@@ -101,6 +101,25 @@ test('sin elegir, el tema sigue al sistema y el panel queda en claro', async ({ 
   await expect(page.locator('html')).not.toHaveClass(/dark/)
 })
 
+test('en la ficha se suma, se resta y se escribe la cantidad del carrito', async ({ page }) => {
+  await page.goto('/?q=buje')
+  await page.getByRole('link', { name: /Buje de bronce/ }).click()
+  await page.getByRole('button', { name: 'Agregar al carrito' }).click()
+  const campo = page.getByLabel('Cantidad en el carrito')
+  await expect(campo).toHaveValue('1')
+  await page.getByRole('button', { name: /Sumar uno/ }).click()
+  await expect(campo).toHaveValue('2')
+  await campo.fill('5')
+  await campo.press('Enter')
+  await expect(page.getByRole('link', { name: /^Carrito: 1 producto · 5 unidades/ })).toBeVisible()
+  await page.getByRole('button', { name: /Quitar uno/ }).click()
+  await expect(campo).toHaveValue('4')
+
+  // Volver deja el listado con la búsqueda que tenía.
+  await page.getByRole('button', { name: 'Catálogo' }).click()
+  await expect(page).toHaveURL(/q=buje/)
+})
+
 test('un producto sin stock no se puede agregar', async ({ page }) => {
   await page.goto('/producto/3')
   await expect(page.getByRole('heading', { name: 'Caño de acero' })).toBeVisible()
