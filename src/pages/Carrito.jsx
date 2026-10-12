@@ -28,7 +28,7 @@ function Cantidad({ item, unidad, alCambiar }) {
     <input
       aria-label="Cantidad"
       aria-invalid={error}
-      className={`w-20 rounded-md border px-2 py-1.5 ${error ? 'border-sin-stock' : 'border-stone-300'}`}
+      className={`w-20 rounded-md border px-2 py-1.5 ${error ? 'border-sin-stock' : 'border-linea'}`}
       inputMode={unidad === 'unidad' ? 'numeric' : 'decimal'}
       value={texto}
       onChange={(e) => setTexto(e.target.value)}
@@ -85,23 +85,23 @@ export default function Carrito() {
       <main className="mx-auto max-w-3xl px-4 py-6">
         <h1 className="mb-4 text-2xl font-semibold">Carrito</h1>
         {items.length === 0 && (
-          <p className="text-stone-500">
-            Tu carrito está vacío. <Link to="/" className="text-marca underline">Ver el catálogo</Link>
+          <p className="text-suave">
+            Tu carrito está vacío. <Link to="/" className="text-tinta underline">Ver el catálogo</Link>
           </p>
         )}
         {error && <p className="text-sin-stock">{error}</p>}
-        {items.length > 0 && !error && productos === null && <p className="text-stone-500">Cargando…</p>}
+        {items.length > 0 && !error && productos === null && <p className="text-suave">Cargando…</p>}
 
         {items.length > 0 && productos && (
           <>
-            <ul className="divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
+            <ul className="divide-y divide-linea rounded-lg border border-linea bg-superficie">
               {items.map((item) => {
                 const p = productos[item.productId]
                 if (!p) {
                   return (
                     <li key={item.productId} className="flex items-center justify-between gap-3 p-3">
-                      <span className="text-stone-500">Un producto de tu carrito ya no está publicado.</span>
-                      <button type="button" className="text-sm text-marca underline" onClick={() => quitar(item.productId)}>
+                      <span className="text-suave">Un producto de tu carrito ya no está publicado.</span>
+                      <button type="button" className="text-sm text-tinta underline" onClick={() => quitar(item.productId)}>
                         Quitar
                       </button>
                     </li>
@@ -110,23 +110,23 @@ export default function Carrito() {
                 const unidad = UNIDADES[p.unit]?.toLowerCase()
                 return (
                   <li key={item.productId} className="flex gap-3 p-3">
-                    <Link to={`/producto/${p.id}`} className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-stone-100">
+                    <Link to={`/producto/${p.id}`} className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-foto">
                       {fotos[p.id] && <img src={urlFoto(fotos[p.id])} alt="" className="h-full w-full object-cover" />}
                     </Link>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
                           <Link to={`/producto/${p.id}`} className="font-medium hover:underline">{p.name}</Link>
-                          <p className="text-sm text-stone-500">{[p.brand_name, p.model].filter(Boolean).join(' · ')}</p>
+                          <p className="font-mono text-[11px] text-suave">{[p.brand_name, p.model].filter(Boolean).join(' · ')}</p>
                         </div>
                         <EstadoStock estado={p.status} />
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
                         <Cantidad key={item.cantidad} item={item} unidad={p.unit} alCambiar={(n) => cambiar(p.id, n)} />
-                        {p.unit !== 'unidad' && <span className="text-stone-500">{unidad}</span>}
-                        <span className="text-stone-500">× {formatearPrecio(p.price)}</span>
+                        {p.unit !== 'unidad' && <span className="text-suave">{unidad}</span>}
+                        <span className="text-suave">× {formatearPrecio(p.price)}</span>
                         <span className="ml-auto font-semibold">{formatearPrecio(Number(p.price) * item.cantidad)}</span>
-                        <button type="button" className="text-marca underline" onClick={() => quitar(p.id)}>
+                        <button type="button" className="text-tinta underline" onClick={() => quitar(p.id)}>
                           Quitar
                         </button>
                       </div>
@@ -141,24 +141,24 @@ export default function Carrito() {
 
             {publicados.length > 0 && (
               <div className="mt-4 flex items-baseline justify-between px-1">
-                <span className="text-stone-600">Total estimado</span>
-                <span className="text-xl font-semibold">{formatearPrecio(totalEstimado(publicados, productos))}</span>
+                <span className="text-suave">Total estimado</span>
+                <span className="text-xl font-semibold text-tinta tabular-nums">{formatearPrecio(totalEstimado(publicados, productos))}</span>
               </div>
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               {enlace && publicados.length > 0 ? (
-                <a href={enlace} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#25d366] px-5 py-3 font-medium text-white hover:brightness-95">
+                <a href={enlace} target="_blank" rel="noopener noreferrer" className="rounded-md bg-whatsapp px-5 py-3 font-medium text-white hover:brightness-95">
                   Consultar por WhatsApp
                 </a>
               ) : (
-                config && !enlace && <p className="text-sm text-stone-500">La consulta por WhatsApp todavía no está habilitada.</p>
+                config && !enlace && <p className="text-sm text-suave">La consulta por WhatsApp todavía no está habilitada.</p>
               )}
-              <button type="button" className="text-sm text-stone-600 underline" onClick={() => window.confirm('¿Vaciar el carrito?') && vaciar()}>
+              <button type="button" className="text-sm text-suave underline" onClick={() => window.confirm('¿Vaciar el carrito?') && vaciar()}>
                 Vaciar carrito
               </button>
             </div>
-            <p className="mt-3 text-sm text-stone-500">
+            <p className="mt-3 text-sm text-suave">
               Se abre WhatsApp con tu pedido escrito para que lo envíes. No es una compra: te respondemos con la confirmación.
             </p>
           </>

@@ -38,8 +38,9 @@ test('del catálogo a WhatsApp: agregar, cambiar cantidad y consultar', async ({
   await page.getByRole('button', { name: 'Agregar al carrito' }).click()
   await expect(page.getByRole('status')).toContainText('Tenés 3 en el carrito')
 
+  await expect(page.getByRole('link', { name: /^Carrito: 1 producto · 3 unidades/ })).toBeVisible()
   await page.getByRole('link', { name: 'Ver carrito' }).click()
-  await expect(page.getByRole('link', { name: 'Carrito (1)' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Carrito' })).toBeVisible()
   await expect(page.getByText('$ 37.500', { exact: false }).first()).toBeVisible()
 
   await page.getByLabel('Cantidad').fill('4')
@@ -55,7 +56,41 @@ test('del catálogo a WhatsApp: agregar, cambiar cantidad y consultar', async ({
 
   // El carrito sobrevive a recargar la página.
   await page.reload()
-  await expect(page.getByRole('link', { name: 'Carrito (1)' })).toBeVisible()
+  await expect(page.getByLabel('Cantidad')).toHaveValue('4')
+})
+
+test('agregar desde la tarjeta y consultar desde la barra de abajo', async ({ page }) => {
+  await page.goto('/')
+  const buje = page.getByRole('listitem').filter({ hasText: 'Buje de bronce' })
+  await buje.getByRole('button', { name: /Agregar/ }).click()
+  await buje.getByRole('button', { name: /Agregar/ }).click()
+  await expect(buje.getByRole('button')).toHaveText('En el carrito · 2')
+  await expect(page.getByRole('listitem').filter({ hasText: 'Caño de acero' }).getByRole('button')).toBeDisabled()
+
+  await expect(page.getByRole('link', { name: /^Carrito: 1 producto · 2 unidades/ })).toContainText('$ 25.000')
+  const href = await page.getByRole('link', { name: 'Consultar por WhatsApp' }).getAttribute('href')
+  expect(decodeURIComponent(href.split('text=')[1])).toContain('- 2 × Buje de bronce · Fiat · 128')
+})
+
+test('el botón de tema alterna claro y oscuro y se recuerda', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.goto('/')
+  const html = page.locator('html')
+  await expect(html).not.toHaveClass(/dark/)
+  await page.getByRole('button', { name: 'Cambiar a modo oscuro' }).click()
+  await expect(html).toHaveClass(/dark/)
+  await page.reload()
+  await expect(html).toHaveClass(/dark/)
+  await page.getByRole('button', { name: 'Cambiar a modo claro' }).click()
+  await expect(html).not.toHaveClass(/dark/)
+})
+
+test('sin elegir, el tema sigue al sistema y el panel queda en claro', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.goto('/')
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  await page.goto('/admin/login')
+  await expect(page.locator('html')).not.toHaveClass(/dark/)
 })
 
 test('un producto sin stock no se puede agregar', async ({ page }) => {

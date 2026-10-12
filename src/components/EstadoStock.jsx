@@ -1,14 +1,15 @@
 import { ETIQUETA_ESTADO } from '../lib/estado.js'
 
 const COLORES = {
-  disponible: 'bg-disponible/10 text-disponible',
-  ultimas: 'bg-ultimas/10 text-ultimas',
-  sin_stock: 'bg-sin-stock/10 text-sin-stock',
+  disponible: 'text-disponible',
+  ultimas: 'text-ultimas',
+  sin_stock: 'text-sin-stock',
 }
 
 export default function EstadoStock({ estado }) {
   return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${COLORES[estado] ?? ''}`}>
+    <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium whitespace-nowrap ${COLORES[estado] ?? ''}`}>
+      <span aria-hidden="true" className="h-[7px] w-[7px] rounded-full bg-current" />
       {ETIQUETA_ESTADO[estado] ?? estado}
     </span>
   )
