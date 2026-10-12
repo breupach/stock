@@ -40,4 +40,6 @@ npm test                                                  # app (Vitest)
 npm run test:db -- "postgresql://postgres@localhost:5432/postgres"   # reglas de la base contra un Postgres local
 ```
 
+Vercel corre lint, `npm test` y el build en cada deploy y en cada preview de PR; si algo falla, no publica. `test:db` necesita un Postgres, así que se corre localmente antes de cada push.
+
 `test:db` crea una base temporal, aplica las migraciones con un reemplazo mínimo de lo que provee Supabase, prueba permisos y reglas de stock (incluidas dos ventas simultáneas de la última unidad) y la borra al terminar.

@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npm run lint && npm test && npm run build",
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+}
