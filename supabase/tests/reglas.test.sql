@@ -69,6 +69,20 @@ select public.revertir_movimiento((select max(id) from public.stock_movements wh
 select pg_temp.igual((select stock from public.products where sku = 'BUJ-001'), 1.000, 'stock tras revertir');
 select pg_temp.espera_error($$select public.revertir_movimiento((select max(id) from public.stock_movements where reverses_id is null and type = 'ajuste'), 'otra vez')$$, 'movimiento_ya_revertido');
 
+-- Marcas, categorías y fotos (sigue el operador)
+select pg_temp.espera_error($$insert into public.brands (name) values ('Otra')$$, 'row-level security');
+select pg_temp.espera_error($$insert into public.product_photos (product_id, storage_path) values ((select id from public.products where sku = 'BUJ-001'), 'op.webp')$$, 'row-level security');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.espera_error($$delete from public.brands where name = 'Acme'$$, 'foreign key');
+insert into public.categories (name) values ('Bujes');
+update public.categories set name = 'Bujes y arandelas' where name = 'Bujes';
+insert into public.product_photos (product_id, storage_path, sort_order)
+  select (select id from public.products where sku = 'BUJ-001'), 'f' || n || '.webp', n from generate_series(1, 5) n;
+select pg_temp.espera_error($$insert into public.product_photos (product_id, storage_path) values ((select id from public.products where sku = 'BUJ-001'), 'f6.webp')$$, 'maximo_fotos');
+delete from public.product_photos where storage_path = 'f5.webp';
+select pg_temp.igual((select count(*) from public.product_photos), 4::bigint, 'fotos tras borrar una');
+select pg_temp.espera_error($$insert into public.products (sku, name, price) values ('BUJ-001', 'Repetido', 1)$$, 'duplicate key');
+
 -- Usuario dado de baja: sin acceso
 set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
 select pg_temp.espera_error($$select public.registrar_movimiento(1, 'entrada', 1)$$, 'no_autorizado');
@@ -83,6 +97,7 @@ select pg_temp.espera_error($$select stock from public.catalogo_publico$$, 'does
 select pg_temp.espera_error($$select cost from public.catalogo_publico$$, 'does not exist');
 select pg_temp.espera_error($$select * from public.products$$, 'permission denied');
 select pg_temp.espera_error($$select * from public.stock_movements$$, 'permission denied');
+select pg_temp.igual((select count(*) from public.product_photos), 4::bigint, 'fotos públicas de un producto visible');
 select pg_temp.espera_error($$select public.registrar_movimiento(1, 'entrada', 1)$$, 'permission denied');
 reset role;
 
