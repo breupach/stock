@@ -14,7 +14,7 @@ import { supabase } from '../lib/supabase.js'
 const ficha = 'rounded-full border border-linea bg-superficie px-3 py-1.5 text-[13px] text-texto'
 
 function BotonAgregar({ p }) {
-  const { items, agregar } = useCarrito()
+  const { items, agregar, cambiar } = useCarrito()
   const enCarrito = items.find((i) => i.productId === p.id)
   const base = 'mt-2 w-full rounded-md border py-1.5 text-[13px] font-semibold'
   if (p.status === 'sin_stock') {
@@ -24,15 +24,32 @@ function BotonAgregar({ p }) {
       </button>
     )
   }
-  // Suma de a una unidad (o un metro, kilo, etc.); la cantidad exacta se ajusta en el carrito.
+  // Suma o resta de a una unidad (o un metro, kilo, etc.); restar desde 1 lo saca del carrito.
+  // La cantidad exacta se escribe en el carrito o en la ficha.
+  if (enCarrito) {
+    const paso = 'grid w-9 shrink-0 place-items-center text-lg leading-none hover:bg-accion/15'
+    return (
+      <div className={`${base} flex items-stretch overflow-hidden border-accion bg-accion-suave p-0 text-accion`}>
+        <button type="button" className={paso} aria-label={`Quitar uno de ${p.name}`} onClick={() => cambiar(p.id, enCarrito.cantidad - 1)}>
+          −
+        </button>
+        <span role="status" className="flex min-w-0 flex-1 items-center justify-center truncate py-1.5 tabular-nums">
+          En el carrito {formatearCantidad(enCarrito.cantidad)}
+        </span>
+        <button type="button" className={paso} aria-label={`Sumar uno de ${p.name}`} onClick={() => agregar(p.id, 1)}>
+          +
+        </button>
+      </div>
+    )
+  }
   return (
     <button
       type="button"
       onClick={() => agregar(p.id, 1)}
-      aria-label={enCarrito ? `Agregar otro ${p.name} (en el carrito: ${formatearCantidad(enCarrito.cantidad)})` : `Agregar ${p.name} al carrito`}
-      className={`${base} border-accion text-accion hover:bg-accion-suave ${enCarrito ? 'bg-accion-suave' : ''}`}
+      aria-label={`Agregar ${p.name} al carrito`}
+      className={`${base} border-accion text-accion hover:bg-accion-suave`}
     >
-      {enCarrito ? `En el carrito · ${formatearCantidad(enCarrito.cantidad)}` : '+ Agregar'}
+      + Agregar
     </button>
   )
 }

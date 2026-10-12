@@ -63,13 +63,21 @@ test('agregar desde la tarjeta y consultar desde la barra de abajo', async ({ pa
   await page.goto('/')
   const buje = page.getByRole('listitem').filter({ hasText: 'Buje de bronce' })
   await buje.getByRole('button', { name: /Agregar/ }).click()
-  await buje.getByRole('button', { name: /Agregar/ }).click()
-  await expect(buje.getByRole('button')).toHaveText('En el carrito · 2')
+  await buje.getByRole('button', { name: /Sumar uno/ }).click()
+  await buje.getByRole('button', { name: /Sumar uno/ }).click()
+  await buje.getByRole('button', { name: /Quitar uno/ }).click()
+  await expect(buje.getByRole('status')).toHaveText('En el carrito 2')
   await expect(page.getByRole('listitem').filter({ hasText: 'Caño de acero' }).getByRole('button')).toBeDisabled()
 
   await expect(page.getByRole('link', { name: /^Carrito: 1 producto · 2 unidades/ })).toContainText('$ 25.000')
   const href = await page.getByRole('link', { name: 'Consultar por WhatsApp' }).getAttribute('href')
   expect(decodeURIComponent(href.split('text=')[1])).toContain('- 2 × Buje de bronce · Fiat · 128')
+
+  // Restar desde 1 lo saca del carrito y vuelve el botón de agregar.
+  await buje.getByRole('button', { name: /Quitar uno/ }).click()
+  await buje.getByRole('button', { name: /Quitar uno/ }).click()
+  await expect(buje.getByRole('button', { name: /Agregar/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Carrito:/ })).toHaveCount(0)
 })
 
 test('el botón de tema alterna claro y oscuro y se recuerda', async ({ page }) => {
