@@ -4,7 +4,10 @@ import Protegida from './auth/Protegida.jsx'
 import { supabaseConfigurado } from './lib/supabase.js'
 import AdminLayout from './pages/admin/AdminLayout.jsx'
 import Login from './pages/admin/Login.jsx'
+import MarcasCategorias from './pages/admin/MarcasCategorias.jsx'
 import Pendiente from './pages/admin/Pendiente.jsx'
+import Producto from './pages/admin/Producto.jsx'
+import Productos from './pages/admin/Productos.jsx'
 import Usuarios from './pages/admin/Usuarios.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import EnConstruccion from './pages/EnConstruccion.jsx'
@@ -29,13 +32,22 @@ export default function App() {
           }
         >
           <Route index element={<Pendiente titulo="Tablero" />} />
-          <Route path="productos" element={<Pendiente titulo="Productos" />} />
+          <Route path="productos" element={<Productos />} />
+          <Route
+            path="productos/nuevo"
+            element={
+              <Protegida soloAdmin>
+                <Producto />
+              </Protegida>
+            }
+          />
+          <Route path="productos/:id" element={<Producto />} />
           <Route path="movimientos" element={<Pendiente titulo="Movimientos" />} />
           <Route
             path="marcas-categorias"
             element={
               <Protegida soloAdmin>
-                <Pendiente titulo="Marcas y categorías" />
+                <MarcasCategorias />
               </Protegida>
             }
           />
