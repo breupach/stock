@@ -26,6 +26,10 @@ Después creá el primer administrador (necesita `SUPABASE_SERVICE_ROLE_KEY` en 
 node --env-file=.env.local scripts/crear-admin.js admin "Nombre Apellido" "una-contraseña-segura"
 ```
 
+## Usuarios
+
+Se ingresa al panel en `/admin/login` con usuario y contraseña. El admin crea usuarios, cambia roles, resetea contraseñas y desactiva cuentas desde **Usuarios**. Esa pantalla habla con la función `/api/users` de Vercel, que usa `SUPABASE_SERVICE_ROLE_KEY`: esa variable va en Vercel **sin** prefijo `VITE_`, para que nunca llegue al navegador. Un usuario desactivado no puede ingresar y pierde la sesión.
+
 ## Reglas que garantiza la base
 
 - El stock nunca queda negativo y solo cambia con `registrar_movimiento`, `registrar_conteo` o `revertir_movimiento`.
