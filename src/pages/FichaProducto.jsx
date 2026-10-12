@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import AgregarAlCarrito from '../components/AgregarAlCarrito.jsx'
 import Encabezado from '../components/Encabezado.jsx'
 import EstadoStock from '../components/EstadoStock.jsx'
 import { useEstadosEnVivo } from '../hooks/useEstadosEnVivo.js'
@@ -102,6 +103,7 @@ export default function FichaProducto() {
                 <EstadoStock estado={producto.status} />
               </div>
               {producto.description && <p className="mt-4 whitespace-pre-line">{producto.description}</p>}
+              <AgregarAlCarrito producto={producto} />
               <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                 <dt className="text-stone-500">Código</dt>
                 <dd>{producto.sku}</dd>
