@@ -14,7 +14,7 @@ export default function AgregarAlCarrito({ producto }) {
   const porUnidad = producto.unit === 'unidad'
 
   if (producto.status === 'sin_stock') {
-    return <p className="mt-6 rounded-md bg-stone-100 px-3 py-2 text-sm text-stone-600">Sin stock por ahora. Volvé a fijarte más adelante.</p>
+    return <p className="mt-6 rounded-md bg-foto px-3 py-2 text-sm text-suave">Sin stock por ahora. Volvé a fijarte más adelante.</p>
   }
 
   function enviar(e) {
@@ -32,7 +32,7 @@ export default function AgregarAlCarrito({ producto }) {
         <label>
           <span className="text-sm font-medium">Cantidad{!porUnidad && ` (${UNIDADES[producto.unit]?.toLowerCase()})`}</span>
           <input
-            className="mt-1 block w-24 rounded-md border border-stone-300 px-3 py-2"
+            className="mt-1 block w-24 rounded-md border border-linea px-3 py-2"
             inputMode={porUnidad ? 'numeric' : 'decimal'}
             value={cantidad}
             onChange={(e) => {
@@ -41,7 +41,7 @@ export default function AgregarAlCarrito({ producto }) {
             }}
           />
         </label>
-        <button type="submit" className="rounded-md bg-marca px-4 py-2.5 font-medium text-white hover:bg-marca-oscuro">
+        <button type="submit" className="rounded-md bg-accion px-4 py-2.5 font-semibold text-white hover:brightness-95">
           Agregar al carrito
         </button>
       </div>
@@ -49,7 +49,7 @@ export default function AgregarAlCarrito({ producto }) {
       {agregado && enCarrito && (
         <p role="status" className="text-sm text-disponible">
           Agregado. Tenés {formatearCantidad(enCarrito.cantidad)} en el carrito.{' '}
-          <Link to="/carrito" className="text-marca underline">Ver carrito</Link>
+          <Link to="/carrito" className="text-tinta underline">Ver carrito</Link>
         </p>
       )}
     </form>

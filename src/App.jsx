@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes } from 'react-router'
 import AuthProvider from './auth/AuthProvider.jsx'
 import CarritoProvider from './carrito/CarritoProvider.jsx'
 import Protegida from './auth/Protegida.jsx'
@@ -17,6 +17,7 @@ import Carrito from './pages/Carrito.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import FaltaConfiguracion from './pages/FaltaConfiguracion.jsx'
 import FichaProducto from './pages/FichaProducto.jsx'
+import TemaProvider from './tema/TemaProvider.jsx'
 
 export default function App() {
   if (!supabaseConfigurado) return <FaltaConfiguracion />
@@ -25,9 +26,17 @@ export default function App() {
     <AuthProvider>
       <CarritoProvider>
         <Routes>
-          <Route path="/" element={<Catalogo />} />
-          <Route path="/producto/:id" element={<FichaProducto />} />
-          <Route path="/carrito" element={<Carrito />} />
+          <Route
+            element={
+              <TemaProvider>
+                <Outlet />
+              </TemaProvider>
+            }
+          >
+            <Route path="/" element={<Catalogo />} />
+            <Route path="/producto/:id" element={<FichaProducto />} />
+            <Route path="/carrito" element={<Carrito />} />
+          </Route>
           <Route path="/admin/login" element={<Login />} />
           <Route
             path="/admin"

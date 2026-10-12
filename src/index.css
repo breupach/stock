@@ -1,13 +1,70 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-marca: #0f766e;
-  --color-marca-oscuro: #115e59;
-  --color-disponible: #15803d;
-  --color-ultimas: #b45309;
-  --color-sin-stock: #b91c1c;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --color-marca: #1c3d7a;
+  --color-marca-oscuro: #15306a;
+  --color-whatsapp: #25a35a;
+}
+
+/* Colores que cambian con el tema. El modo oscuro solo se activa en las pantallas
+   públicas (la clase .dark la pone TemaProvider); el panel usa siempre los claros. */
+@theme inline {
+  --color-papel: var(--papel);
+  --color-superficie: var(--superficie);
+  --color-texto: var(--texto);
+  --color-suave: var(--suave);
+  --color-linea: var(--linea);
+  --color-tinta: var(--tinta);
+  --color-activo: var(--activo);
+  --color-accion: var(--accion);
+  --color-accion-suave: var(--accion-suave);
+  --color-foto: var(--foto);
+  --color-encabezado: var(--encabezado);
+  --color-barra: var(--barra);
+  --color-disponible: var(--disponible);
+  --color-ultimas: var(--ultimas);
+  --color-sin-stock: var(--sin-stock);
+}
+
+:root {
+  --papel: #f2f5f8;
+  --superficie: #ffffff;
+  --texto: #16264a;
+  --suave: #56698e;
+  --linea: #d3dcea;
+  --tinta: #1c3d7a;
+  --activo: #1c3d7a;
+  --accion: #c9480f;
+  --accion-suave: #fdeee6;
+  --foto: #e8edf4;
+  --encabezado: #1c3d7a;
+  --barra: #1c3d7a;
+  --disponible: #1f7a3a;
+  --ultimas: #a35f00;
+  --sin-stock: #b3261e;
+}
+
+:root.dark {
+  --papel: #0e1525;
+  --superficie: #172138;
+  --texto: #e3e9f5;
+  --suave: #93a3c4;
+  --linea: #283553;
+  --tinta: #a9c1ff;
+  --activo: #2d4c94;
+  --accion: #f2814d;
+  --accion-suave: #3a2316;
+  --foto: #1d2944;
+  --encabezado: #121c33;
+  --barra: #24335a;
+  --disponible: #5cc98a;
+  --ultimas: #e8a948;
+  --sin-stock: #f27b72;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-stone-50 text-stone-900 antialiased;
+  @apply bg-papel text-texto antialiased;
 }
