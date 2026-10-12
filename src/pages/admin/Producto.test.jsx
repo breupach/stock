@@ -19,11 +19,12 @@ function consulta(tabla) {
     product_photos: { data: [] },
     price_changes: { data: [] },
     profiles: { data: [] },
+    stock_movements: { data: [] },
   }[tabla]
   const q = {
     then: (ok, mal) => Promise.resolve({ error: null, ...resultado }).then(ok, mal),
   }
-  for (const m of ['select', 'order', 'eq', 'maybeSingle', 'single', 'update']) q[m] = () => q
+  for (const m of ['select', 'order', 'eq', 'in', 'limit', 'maybeSingle', 'single', 'update']) q[m] = () => q
   q.insert = (fila) => {
     insertar(fila)
     return q

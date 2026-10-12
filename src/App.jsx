@@ -5,9 +5,12 @@ import { supabaseConfigurado } from './lib/supabase.js'
 import AdminLayout from './pages/admin/AdminLayout.jsx'
 import Login from './pages/admin/Login.jsx'
 import MarcasCategorias from './pages/admin/MarcasCategorias.jsx'
+import Movimientos from './pages/admin/Movimientos.jsx'
 import Pendiente from './pages/admin/Pendiente.jsx'
 import Producto from './pages/admin/Producto.jsx'
 import Productos from './pages/admin/Productos.jsx'
+import RegistrarMovimiento from './pages/admin/RegistrarMovimiento.jsx'
+import Tablero from './pages/admin/Tablero.jsx'
 import Usuarios from './pages/admin/Usuarios.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import EnConstruccion from './pages/EnConstruccion.jsx'
@@ -31,7 +34,7 @@ export default function App() {
             </Protegida>
           }
         >
-          <Route index element={<Pendiente titulo="Tablero" />} />
+          <Route index element={<Tablero />} />
           <Route path="productos" element={<Productos />} />
           <Route
             path="productos/nuevo"
@@ -42,7 +45,8 @@ export default function App() {
             }
           />
           <Route path="productos/:id" element={<Producto />} />
-          <Route path="movimientos" element={<Pendiente titulo="Movimientos" />} />
+          <Route path="movimientos" element={<Movimientos />} />
+          <Route path="movimientos/nuevo" element={<RegistrarMovimiento />} />
           <Route
             path="marcas-categorias"
             element={

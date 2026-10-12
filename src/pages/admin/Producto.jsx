@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useAuth } from '../../auth/contexto.js'
 import EstadoStock from '../../components/EstadoStock.jsx'
+import ListaMovimientos from '../../components/ListaMovimientos.jsx'
+import { COLUMNAS_MOVIMIENTO, marcarRevertidos } from '../../lib/consultasMovimientos.js'
 import { calcularEstado } from '../../lib/estado.js'
 import { formatearCantidad, formatearPrecio } from '../../lib/formato.js'
 import { borrarFoto, MAX_FOTOS, subirFoto, urlFoto } from '../../lib/fotos.js'
@@ -251,20 +253,24 @@ export default function Producto() {
         supabase.from('product_photos').select('id, storage_path, sort_order').eq('product_id', id).order('sort_order'),
         supabase.from('price_changes').select('id, old_price, new_price, user_id, created_at').eq('product_id', id).order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, name'),
+        supabase.from('stock_movements').select(COLUMNAS_MOVIMIENTO).eq('product_id', id).order('created_at', { ascending: false }).limit(20),
       )
     }
-    Promise.all(consultas).then(([marcas, categorias, producto, fotos, precios, perfiles]) => {
+    Promise.all(consultas).then(async ([marcas, categorias, producto, fotos, precios, perfiles, movimientos]) => {
       if (!vigente) return
-      if ([marcas, categorias, producto, fotos, precios].some((r) => r?.error)) {
+      if ([marcas, categorias, producto, fotos, precios, movimientos].some((r) => r?.error)) {
         return setError('No se pudo cargar el producto.')
       }
       if (!nuevo && !producto.data) return setError('Ese producto no existe.')
+      const conMarca = movimientos ? await marcarRevertidos(movimientos.data) : []
+      if (!vigente) return
       setDatos({
         marcas: marcas.data,
         categorias: categorias.data,
         producto: producto?.data ?? null,
         fotos: fotos?.data ?? [],
         precios: precios?.data ?? [],
+        movimientos: conMarca,
         nombres: Object.fromEntries((perfiles?.data ?? []).map((p) => [p.id, p.name])),
       })
     })
@@ -292,7 +298,13 @@ export default function Producto() {
           <span className="text-sm text-stone-500">Stock actual</span>
           <span className="text-xl font-semibold">{formatearCantidad(p.stock)} {UNIDADES[p.unit]?.toLowerCase()}</span>
           <EstadoStock estado={calcularEstado(p.stock, p.min_stock)} />
-          <span className="text-sm text-stone-500">El stock cambia solo con movimientos.</span>
+          {p.active ? (
+            <Link to={`/admin/movimientos/nuevo?producto=${p.id}`} className="ml-auto rounded-md bg-marca px-3 py-2 text-sm font-medium text-white">
+              Registrar movimiento
+            </Link>
+          ) : (
+            <span className="text-sm text-stone-500">Producto inactivo: no admite movimientos.</span>
+          )}
         </div>
       )}
 
@@ -308,6 +320,23 @@ export default function Producto() {
         />
       )}
       {p && <Fotos productoId={p.id} fotos={datos.fotos} editable={esAdmin} alCambiar={recargar} />}
+      {p && (
+        <section className="rounded-lg border border-stone-200 bg-white p-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-semibold">Últimos movimientos</h2>
+            <Link to="/admin/movimientos" className="text-sm text-marca underline">Ver historial</Link>
+          </div>
+          <div className="mt-1">
+            <ListaMovimientos
+              movimientos={datos.movimientos}
+              nombres={datos.nombres}
+              mostrarProducto={false}
+              alCambiar={recargar}
+              vacio="Este producto todavía no tiene movimientos."
+            />
+          </div>
+        </section>
+      )}
       {p && <HistorialPrecios cambios={datos.precios} nombres={datos.nombres} />}
     </div>
   )

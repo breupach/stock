@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { salir } from '../../auth/acciones.js'
 import { useAuth } from '../../auth/contexto.js'
 
@@ -15,6 +15,7 @@ const SECCIONES = [
 export default function AdminLayout() {
   const { perfil } = useAuth()
   const [abierto, setAbierto] = useState(false)
+  const { pathname } = useLocation()
   const secciones = SECCIONES.filter((s) => !s.soloAdmin || perfil?.role === 'admin')
 
   const enlace = ({ isActive }) =>
@@ -48,9 +49,17 @@ export default function AdminLayout() {
           </div>
         </nav>
       </header>
-      <main className="flex-1 px-4 py-6">
+      <main className="flex-1 px-4 pt-6 pb-24">
         <Outlet />
       </main>
+      {pathname !== '/admin/movimientos/nuevo' && (
+        <Link
+          to="/admin/movimientos/nuevo"
+          className="fixed right-4 bottom-4 rounded-full bg-marca px-5 py-3 font-medium text-white shadow-lg hover:bg-marca-oscuro"
+        >
+          + Movimiento
+        </Link>
+      )}
     </div>
   )
 }
