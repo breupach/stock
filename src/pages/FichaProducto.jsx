@@ -12,7 +12,7 @@ import { supabase } from '../lib/supabase.js'
 function Galeria({ fotos, nombre }) {
   const [actual, setActual] = useState(0)
   if (fotos.length === 0) {
-    return <div className="flex aspect-square items-center justify-center rounded-lg bg-stone-100 text-stone-400">Sin foto</div>
+    return <div className="flex aspect-[4/3] items-center md:aspect-square justify-center rounded-lg bg-stone-100 text-stone-400">Sin foto</div>
   }
   return (
     <div>

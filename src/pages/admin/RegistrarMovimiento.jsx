@@ -10,7 +10,7 @@ import {
   validarConteo,
   validarMovimiento,
 } from '../../lib/movimientos.js'
-import { UNIDADES } from '../../lib/productos.js'
+import { UNIDADES, unidadPara } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
 
 const campo = 'mt-1 block w-full rounded-md border border-stone-300 px-3 py-2'
@@ -66,18 +66,17 @@ function ElegirProducto({ productos, elegido, alElegir, error }) {
 
 function Saldos({ producto, delta }) {
   if (!producto) return null
-  const unidad = UNIDADES[producto.unit]?.toLowerCase()
   const despues = delta === null ? null : Number(producto.stock) + delta
   return (
     <div className="flex items-center gap-3 rounded-md bg-stone-100 px-3 py-2 text-sm">
-      <span>Saldo actual <strong>{formatearCantidad(producto.stock)}</strong> {unidad}</span>
+      <span>Saldo actual <strong>{formatearCantidad(producto.stock)}</strong> {unidadPara(producto.unit, producto.stock)}</span>
       <span aria-hidden="true">→</span>
       <span>
         Queda en{' '}
         <strong className={despues !== null && despues < 0 ? 'text-sin-stock' : ''}>
           {despues === null ? '—' : formatearCantidad(despues)}
         </strong>{' '}
-        {unidad}
+        {unidadPara(producto.unit, despues ?? 2)}
       </span>
     </div>
   )

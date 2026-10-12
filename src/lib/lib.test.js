@@ -15,6 +15,8 @@ describe('calcularEstado', () => {
 describe('formato', () => {
   it('muestra pesos argentinos sin mencionar impuestos', () => {
     expect(formatearPrecio(1500)).toMatch(/\$\s?1\.500/)
+    expect(formatearPrecio('4300.5')).toMatch(/\$\s?4\.300,50$/)
+    expect(formatearPrecio('12500.00')).toMatch(/\$\s?12\.500$/)
     expect(formatearPrecio(null)).toBe('—')
   })
   it('muestra cantidades con decimales solo si hacen falta', () => {

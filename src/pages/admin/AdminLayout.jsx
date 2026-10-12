@@ -12,6 +12,10 @@ const SECCIONES = [
   { to: '/admin/configuracion', etiqueta: 'Configuración', soloAdmin: true },
 ]
 
+// El botón flotante tapa campos en los formularios largos; ahí no hace falta porque
+// la ficha del producto ya tiene su propio "Registrar movimiento".
+const sinBotonFlotante = (ruta) => ruta === '/admin/movimientos/nuevo' || ruta.startsWith('/admin/productos/')
+
 export default function AdminLayout() {
   const { perfil } = useAuth()
   const [abierto, setAbierto] = useState(false)
@@ -52,7 +56,7 @@ export default function AdminLayout() {
       <main className="flex-1 px-4 pt-6 pb-24">
         <Outlet />
       </main>
-      {pathname !== '/admin/movimientos/nuevo' && (
+      {!sinBotonFlotante(pathname) && (
         <Link
           to="/admin/movimientos/nuevo"
           className="fixed right-4 bottom-4 rounded-full bg-marca px-5 py-3 font-medium text-white shadow-lg hover:bg-marca-oscuro"

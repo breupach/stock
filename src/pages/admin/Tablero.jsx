@@ -5,7 +5,7 @@ import ListaMovimientos from '../../components/ListaMovimientos.jsx'
 import { COLUMNAS_MOVIMIENTO } from '../../lib/consultasMovimientos.js'
 import { calcularEstado } from '../../lib/estado.js'
 import { formatearCantidad } from '../../lib/formato.js'
-import { UNIDADES } from '../../lib/productos.js'
+import { unidadPara } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
 
 function Cifra({ titulo, valor, to, color = '' }) {
@@ -82,12 +82,12 @@ export default function Tablero() {
           ) : (
             <ul className="mt-2 divide-y divide-stone-100">
               {alertas.map((p) => (
-                <li key={p.id} className="flex items-center justify-between gap-2 py-2">
+                <li key={p.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                   <Link to={`/admin/productos/${p.id}`} className="min-w-0 hover:underline">
                     {p.name} <span className="text-sm text-stone-500">{p.sku}</span>
                   </Link>
-                  <span className="flex shrink-0 items-center gap-2 text-sm">
-                    {formatearCantidad(p.stock)} / mín. {formatearCantidad(p.min_stock)} {UNIDADES[p.unit]?.toLowerCase()}
+                  <span className="flex shrink-0 flex-wrap items-center gap-2 text-sm">
+                    {formatearCantidad(p.stock)} / mín. {formatearCantidad(p.min_stock)} {unidadPara(p.unit, p.min_stock)}
                     <EstadoStock estado={p.estado} />
                   </span>
                 </li>

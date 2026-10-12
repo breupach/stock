@@ -6,6 +6,14 @@ export const UNIDADES = {
   kg: 'Kilo',
 }
 
+const PLURAL = { unidad: 'unidades', metro: 'metros', kg: 'kilos' }
+
+// Nombre de la unidad para acompañar una cantidad: "1 unidad", "20 unidades", "2,5 metros".
+export function unidadPara(unit, cantidad) {
+  const singular = UNIDADES[unit]?.toLowerCase() ?? ''
+  return Math.abs(Number(cantidad)) === 1 ? singular : (PLURAL[unit] ?? singular)
+}
+
 export const FORMULARIO_VACIO = {
   sku: '',
   name: '',

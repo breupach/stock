@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('./supabase.js', () => ({ supabase: null }))
 
 const { medidasReducidas } = await import('./fotos.js')
-const { aFilaProducto, aFormulario, FORMULARIO_VACIO, filtrarProductos, mensajeError, validarProducto } =
+const { aFilaProducto, aFormulario, FORMULARIO_VACIO, filtrarProductos, mensajeError, unidadPara, validarProducto } =
   await import('./productos.js')
 
 const valido = { ...FORMULARIO_VACIO, sku: 'BUJ-1', name: 'Buje', price: '1500' }
@@ -82,5 +82,15 @@ describe('medidasReducidas', () => {
     expect(medidasReducidas(4000, 3000)).toEqual({ ancho: 1200, alto: 900 })
     expect(medidasReducidas(1000, 2400)).toEqual({ ancho: 500, alto: 1200 })
     expect(medidasReducidas(800, 600)).toEqual({ ancho: 800, alto: 600 })
+  })
+})
+
+describe('unidadPara', () => {
+  it('usa singular solo para una unidad', () => {
+    expect(unidadPara('unidad', '1')).toBe('unidad')
+    expect(unidadPara('unidad', 20)).toBe('unidades')
+    expect(unidadPara('metro', -1)).toBe('metro')
+    expect(unidadPara('metro', 2.5)).toBe('metros')
+    expect(unidadPara('kg', 0)).toBe('kilos')
   })
 })

@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { formatearCantidad } from '../lib/formato.js'
 import { ETIQUETA_TIPO, mensajeErrorMovimiento } from '../lib/movimientos.js'
-import { UNIDADES } from '../lib/productos.js'
+import { unidadPara } from '../lib/productos.js'
 import { supabase } from '../lib/supabase.js'
 
 const fecha = new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' })
 
 function Fila({ m, nombres, mostrarProducto, alCambiar }) {
   const [error, setError] = useState(null)
-  const unidad = UNIDADES[m.products?.unit]?.toLowerCase() ?? ''
+  const unidad = unidadPara(m.products?.unit, m.quantity)
   const positivo = Number(m.quantity) > 0
 
   async function revertir() {

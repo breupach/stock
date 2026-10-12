@@ -14,6 +14,7 @@ import {
   mensajeError,
   stockInicial,
   UNIDADES,
+  unidadPara,
   validarProducto,
 } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
@@ -296,7 +297,7 @@ export default function Producto() {
       {p && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-stone-200 bg-white p-4">
           <span className="text-sm text-stone-500">Stock actual</span>
-          <span className="text-xl font-semibold">{formatearCantidad(p.stock)} {UNIDADES[p.unit]?.toLowerCase()}</span>
+          <span className="text-xl font-semibold">{formatearCantidad(p.stock)} {unidadPara(p.unit, p.stock)}</span>
           <EstadoStock estado={calcularEstado(p.stock, p.min_stock)} />
           {p.active ? (
             <Link to={`/admin/movimientos/nuevo?producto=${p.id}`} className="ml-auto rounded-md bg-marca px-3 py-2 text-sm font-medium text-white">
