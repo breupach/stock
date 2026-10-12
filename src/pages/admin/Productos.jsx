@@ -4,7 +4,7 @@ import { useAuth } from '../../auth/contexto.js'
 import EstadoStock from '../../components/EstadoStock.jsx'
 import { calcularEstado } from '../../lib/estado.js'
 import { formatearCantidad, formatearPrecio } from '../../lib/formato.js'
-import { filtrarProductos, UNIDADES } from '../../lib/productos.js'
+import { filtrarProductos, unidadPara } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
 
 const FILTROS = [
@@ -15,7 +15,7 @@ const FILTROS = [
 
 const Saldo = ({ p }) => (
   <>
-    {formatearCantidad(p.stock)} <span className="text-stone-500">{UNIDADES[p.unit]?.toLowerCase()}</span>
+    {formatearCantidad(p.stock)} <span className="text-stone-500">{unidadPara(p.unit, p.stock)}</span>
   </>
 )
 

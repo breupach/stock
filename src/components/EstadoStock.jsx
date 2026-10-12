@@ -8,7 +8,7 @@ const COLORES = {
 
 export default function EstadoStock({ estado }) {
   return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${COLORES[estado] ?? ''}`}>
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${COLORES[estado] ?? ''}`}>
       {ETIQUETA_ESTADO[estado] ?? estado}
     </span>
   )

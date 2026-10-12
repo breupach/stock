@@ -25,8 +25,8 @@ function Tarjeta({ p, foto }) {
         <div className="flex flex-1 flex-col p-3">
           <p className="font-medium">{p.name}</p>
           <p className="text-sm text-stone-500">{[p.brand_name, p.model, p.year].filter(Boolean).join(' · ')}</p>
-          <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-            <span className="font-semibold">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 pt-3">
+            <span className="font-semibold whitespace-nowrap">
               {formatearPrecio(p.price)}
               {p.unit !== 'unidad' && <span className="text-sm font-normal text-stone-500"> / {UNIDADES[p.unit]?.toLowerCase()}</span>}
             </span>
@@ -40,7 +40,10 @@ function Tarjeta({ p, foto }) {
 
 export default function Catalogo() {
   const [parametros, setParametros] = useSearchParams()
-  const filtros = leerFiltros(parametros)
+  // Los filtros viven en el estado y se copian a la dirección. Leerlos directo de la
+  // dirección hace que la búsqueda pierda letras al escribir rápido, porque la
+  // navegación se aplica después de la tecla.
+  const [filtros, setFiltros] = useState(() => leerFiltros(parametros))
   const [productos, setProductos] = useState(null)
   const [fotos, setFotos] = useState({})
   const [error, setError] = useState(null)
@@ -71,7 +74,11 @@ export default function Catalogo() {
   }, [])
   useEstadosEnVivo({ alCambiar, alReconectar: () => setVersion((v) => v + 1) })
 
-  const cambiar = (k, valor) => setParametros(escribirFiltros({ ...filtros, [k]: valor }), { replace: true })
+  const aplicar = (nuevos) => {
+    setFiltros(nuevos)
+    setParametros(escribirFiltros(nuevos), { replace: true })
+  }
+  const cambiar = (k, valor) => aplicar({ ...filtros, [k]: valor })
   const lista = productos ? filtrarCatalogo(productos, filtros) : []
   const marcas = productos ? opcionesDe(productos, 'brand_id', 'brand_name') : []
   const categorias = productos ? opcionesDe(productos, 'category_id', 'category_name') : []
@@ -92,23 +99,23 @@ export default function Catalogo() {
             onChange={(e) => cambiar('texto', e.target.value)}
           />
           {marcas.length > 0 && (
-            <select aria-label="Marca" className={campo} value={filtros.marca} onChange={(e) => cambiar('marca', e.target.value)}>
-              <option value="">Todas las marcas</option>
+            <select aria-label="Marca" className={`${campo} min-w-0 flex-1 sm:flex-none`} value={filtros.marca} onChange={(e) => cambiar('marca', e.target.value)}>
+              <option value="">Marca: todas</option>
               {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
             </select>
           )}
           {categorias.length > 0 && (
-            <select aria-label="Categoría" className={campo} value={filtros.categoria} onChange={(e) => cambiar('categoria', e.target.value)}>
-              <option value="">Todas las categorías</option>
+            <select aria-label="Categoría" className={`${campo} min-w-0 flex-1 sm:flex-none`} value={filtros.categoria} onChange={(e) => cambiar('categoria', e.target.value)}>
+              <option value="">Categoría: todas</option>
               {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
           )}
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex w-full items-center gap-2 text-sm sm:w-auto">
             <input type="checkbox" checked={filtros.soloDisponibles} onChange={(e) => cambiar('soloDisponibles', e.target.checked)} />
             Solo disponibles
           </label>
           {hayFiltros && (
-            <button type="button" className="text-sm text-marca underline" onClick={() => setParametros({}, { replace: true })}>
+            <button type="button" className="text-sm text-marca underline" onClick={() => aplicar(leerFiltros(new URLSearchParams()))}>
               Limpiar
             </button>
           )}
