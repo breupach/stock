@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-marca: #0f766e;
+  --color-marca-oscuro: #115e59;
+  --color-disponible: #15803d;
+  --color-ultimas: #b45309;
+  --color-sin-stock: #b91c1c;
+}
+
+body {
+  @apply bg-stone-50 text-stone-900 antialiased;
+}
