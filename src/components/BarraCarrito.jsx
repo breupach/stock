@@ -46,7 +46,7 @@ export default function BarraCarrito() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-10 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-barra py-2.5 pr-2.5 pl-4 text-white shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)]">
+      <div className="mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border-2 border-borde-barra bg-barra py-2.5 pr-2.5 pl-4 text-white shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)]">
         <Link to="/carrito" className="min-w-0" aria-label={`Carrito: ${resumen}`}>
           <span className="block truncate text-[11px] text-white/75">{resumen}</span>
           <span className="block text-sm font-semibold tabular-nums">
