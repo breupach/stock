@@ -15,6 +15,7 @@ import Usuarios from './pages/admin/Usuarios.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import EnConstruccion from './pages/EnConstruccion.jsx'
 import FaltaConfiguracion from './pages/FaltaConfiguracion.jsx'
+import FichaProducto from './pages/FichaProducto.jsx'
 
 export default function App() {
   if (!supabaseConfigurado) return <FaltaConfiguracion />
@@ -23,7 +24,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Catalogo />} />
-        <Route path="/producto/:id" element={<EnConstruccion titulo="Ficha de producto" />} />
+        <Route path="/producto/:id" element={<FichaProducto />} />
         <Route path="/carrito" element={<EnConstruccion titulo="Carrito" />} />
         <Route path="/admin/login" element={<Login />} />
         <Route
