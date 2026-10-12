@@ -23,6 +23,7 @@
   --color-foto: var(--foto);
   --color-encabezado: var(--encabezado);
   --color-barra: var(--barra);
+  --color-borde-barra: var(--borde-barra);
   --color-disponible: var(--disponible);
   --color-ultimas: var(--ultimas);
   --color-sin-stock: var(--sin-stock);
@@ -41,6 +42,7 @@
   --foto: #e8edf4;
   --encabezado: #1c3d7a;
   --barra: #1c3d7a;
+  --borde-barra: #0b0f17;
   --disponible: #1f7a3a;
   --ultimas: #a35f00;
   --sin-stock: #b3261e;
@@ -59,6 +61,7 @@
   --foto: #1d2944;
   --encabezado: #121c33;
   --barra: #24335a;
+  --borde-barra: #7f93c4;
   --disponible: #5cc98a;
   --ultimas: #e8a948;
   --sin-stock: #f27b72;
