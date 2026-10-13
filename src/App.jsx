@@ -3,7 +3,9 @@ import AuthProvider from './auth/AuthProvider.jsx'
 import CarritoProvider from './carrito/CarritoProvider.jsx'
 import Protegida from './auth/Protegida.jsx'
 import { supabaseConfigurado } from './lib/supabase.js'
+import ActivarCodigo from './pages/admin/ActivarCodigo.jsx'
 import AdminLayout from './pages/admin/AdminLayout.jsx'
+import Codigo from './pages/admin/Codigo.jsx'
 import Configuracion from './pages/admin/Configuracion.jsx'
 import Login from './pages/admin/Login.jsx'
 import MarcasCategorias from './pages/admin/MarcasCategorias.jsx'
@@ -31,6 +33,8 @@ export default function App() {
             <Route path="/producto/:id" element={<FichaProducto />} />
             <Route path="/carrito" element={<Carrito />} />
             <Route path="/admin/login" element={<Login />} />
+            <Route path="/admin/codigo" element={<Codigo />} />
+            <Route path="/admin/activar-codigo" element={<ActivarCodigo />} />
             <Route
               path="/admin"
               element={

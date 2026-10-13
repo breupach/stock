@@ -4,7 +4,7 @@ set -euo pipefail
 PSQL=("$@")
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
-ADMIN="set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';"
+ADMIN="set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a'; set request.jwt.claim.aal = 'aal2';"
 "${PSQL[@]}" -q -c "$ADMIN insert into public.products (sku, name, price) values ('CONC-1', 'Concurrencia', 1);
   select public.registrar_movimiento((select id from public.products where sku = 'CONC-1'), 'stock_inicial', 1);" >/dev/null
 VENTA="$ADMIN begin; select public.registrar_movimiento((select id from public.products where sku = 'CONC-1'), 'salida', 1); select pg_sleep(1); commit;"

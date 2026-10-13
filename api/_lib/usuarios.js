@@ -4,6 +4,17 @@ const ROLES = ['admin', 'operador']
 const BLOQUEO = '876000h' // ~100 años: Supabase no tiene "bloqueo permanente"
 
 const respuesta = (status, body) => ({ status, body })
+
+// Nivel de seguridad de la sesión: aal2 si pasó el código de Google Authenticator.
+// El token ya fue validado con getUser; acá solo se lee lo que dice.
+export function nivelDelToken(token) {
+  try {
+    const carga = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'))
+    return carga.aal ?? 'aal1'
+  } catch {
+    return 'aal1'
+  }
+}
 const error = (status, codigo, mensaje) => respuesta(status, { error: codigo, mensaje })
 
 // Lógica de /api/users, separada del handler de Vercel para poder probarla.
@@ -17,6 +28,9 @@ export async function manejarUsuarios({ metodo, token, cuerpo, admin }) {
   const { data: quien } = await admin.from('profiles').select('role, active').eq('id', auth.user.id).maybeSingle()
   if (!quien?.active || quien.role !== 'admin') {
     return error(403, 'no_autorizado', 'Solo un administrador puede gestionar usuarios.')
+  }
+  if (nivelDelToken(token) !== 'aal2') {
+    return error(403, 'falta_codigo', 'Ingresá el código de seguridad para gestionar usuarios.')
   }
 
   if (metodo === 'POST') return crear(admin, cuerpo ?? {})
@@ -55,8 +69,9 @@ async function crear(admin, { usuario, nombre, contrasena, rol }) {
   return respuesta(201, perfil)
 }
 
-async function actualizar(admin, { id, nombre, rol, activo, contrasena }, idPropio) {
+async function actualizar(admin, { id, nombre, rol, activo, contrasena, restablecerCodigo }, idPropio) {
   if (!id) return error(400, 'falta_id', 'Falta el usuario a modificar.')
+  if (restablecerCodigo) return restablecer(admin, id, idPropio)
   if (id === idPropio && (rol !== undefined || activo === false)) {
     return error(400, 'propio_usuario', 'No podés cambiar tu propio rol ni desactivarte.')
   }
@@ -94,6 +109,19 @@ async function actualizar(admin, { id, nombre, rol, activo, contrasena }, idProp
     if (errorPerfil) return error(500, 'error_actualizacion', 'No se pudo actualizar el usuario.')
     if (!data) return error(404, 'usuario_inexistente', 'El usuario no existe.')
     return respuesta(200, data)
+  }
+  return respuesta(200, { id })
+}
+
+// Borra el código de Google Authenticator de otro usuario (perdió o cambió el
+// celular). Al volver a entrar, la app le pide que lo active de nuevo.
+async function restablecer(admin, id, idPropio) {
+  if (id === idPropio) return error(400, 'propio_usuario', 'No podés restablecer tu propio código.')
+  const { data, error: errorLista } = await admin.auth.admin.mfa.listFactors({ userId: id })
+  if (errorLista) return error(500, 'error_actualizacion', 'No se pudo restablecer el código.')
+  for (const factor of data?.factors ?? []) {
+    const { error: errorBorrado } = await admin.auth.admin.mfa.deleteFactor({ id: factor.id, userId: id })
+    if (errorBorrado) return error(500, 'error_actualizacion', 'No se pudo restablecer el código.')
   }
   return respuesta(200, { id })
 }

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { ingresarComoAdmin, instalarSupabase } from './falsoSupabase.js'
+import { CODIGO, CONTRASENA, ingresarComoAdmin, instalarSupabase } from './falsoSupabase.js'
 
 test.beforeEach(async ({ context }) => {
   await instalarSupabase(context)
@@ -12,6 +12,56 @@ test('el panel pide ingresar y rechaza una contraseña equivocada', async ({ pag
   await page.getByLabel('Contraseña').fill('otra')
   await page.getByRole('button', { name: 'Ingresar' }).click()
   await expect(page.getByRole('alert')).toHaveText('Usuario o contraseña incorrectos.')
+})
+
+async function ingresarConContrasena(page) {
+  await page.goto('/admin')
+  await page.getByLabel('Usuario').fill('admin')
+  await page.getByLabel('Contraseña').fill(CONTRASENA)
+  await page.getByRole('button', { name: 'Ingresar' }).click()
+}
+
+test('el admin ingresa el código de seguridad después de la contraseña', async ({ page }) => {
+  await ingresarConContrasena(page)
+  await expect(page).toHaveURL(/\/admin\/codigo$/)
+  await expect(page.getByText('Stock · admin')).toBeVisible()
+
+  await page.getByLabel('Código').fill('000000')
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByRole('alert')).toHaveText('El código no es correcto. Fijate que sea el que se ve ahora en la app.')
+
+  // Sin el código no se llega al panel aunque se escriba la dirección.
+  await page.goto('/admin/productos')
+  await expect(page).toHaveURL(/\/admin\/codigo$/)
+
+  await page.getByLabel('Código').fill('123 456')
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page).toHaveURL(/\/admin\/productos$/)
+  await expect(page.getByRole('heading', { name: 'Productos' })).toBeVisible()
+})
+
+test('"Volver" deja el código para después y vuelve al ingreso', async ({ page }) => {
+  await ingresarConContrasena(page)
+  await page.getByRole('button', { name: 'Volver' }).click()
+  await expect(page).toHaveURL(/\/admin\/login$/)
+  await page.goto('/admin')
+  await expect(page).toHaveURL(/\/admin\/login$/)
+})
+
+test('un admin sin código lo activa la primera vez', async ({ page, context }) => {
+  await instalarSupabase(context, { sinCodigo: true })
+  await ingresarConContrasena(page)
+  await expect(page).toHaveURL(/\/admin\/activar-codigo$/)
+  const qr = page.getByRole('img', { name: 'Código QR para Google Authenticator' })
+  await expect(qr).toBeVisible()
+  await expect.poll(() => qr.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0)
+  await expect(page.getByText('JBSW Y3DP EHPK 3PXP')).toBeVisible()
+  await page.getByLabel('Código de 6 números').fill(CODIGO)
+  await page.getByRole('button', { name: 'Activar y entrar' }).click()
+  await expect(page.getByRole('heading', { name: 'Tablero' })).toBeVisible()
+
+  await page.goto('/admin/usuarios')
+  await expect(page.getByText('Código de seguridad: activo')).toBeVisible()
 })
 
 test('ingresar, ver el tablero y registrar una salida', async ({ page }) => {

@@ -6,6 +6,8 @@ export const URL_SUPABASE = 'http://supabase.e2e.test'
 
 const ADMIN = { id: '00000000-0000-0000-0000-000000000001', username: 'admin', name: 'Brian', role: 'admin', active: true }
 export const CONTRASENA = 'clave-de-prueba'
+// Código de Google Authenticator que acepta el Supabase falso.
+export const CODIGO = '123456'
 
 function datosIniciales() {
   const productos = [
@@ -70,20 +72,26 @@ function tabla(db, nombre) {
 
 const SIGNO = { entrada: 1, salida: -1, ajuste_positivo: 1, ajuste_negativo: -1, devolucion: 1 }
 
-const token = () => {
+// aal1: entró con la contraseña; aal2: además ingresó el código de seguridad.
+const token = (aal) => {
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
   const ahora = Math.floor(Date.now() / 1000)
-  return `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: ADMIN.id, role: 'authenticated', exp: ahora + 3600, iat: ahora })}.firma`
+  return `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: ADMIN.id, role: 'authenticated', aal, exp: ahora + 3600, iat: ahora })}.ZmlybWE`
 }
 
-const USUARIO = { id: ADMIN.id, aud: 'authenticated', role: 'authenticated', email: 'admin@usuarios.interno', app_metadata: {}, user_metadata: {} }
+const FACTOR = { id: 'factor-1', factor_type: 'totp', friendly_name: 'Google Authenticator', status: 'verified', created_at: '2026-10-13T00:00:00Z', updated_at: '2026-10-13T00:00:00Z' }
+const usuario = (db) => ({ id: ADMIN.id, aud: 'authenticated', role: 'authenticated', email: 'admin@usuarios.interno', app_metadata: {}, user_metadata: {}, factors: db.factores })
+const sesion = (db, aal) => ({ access_token: token(aal), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r', user: usuario(db) })
+// Supabase devuelve el SVG del QR y supabase-js le agrega el "data:image/svg+xml".
+const QR = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><path fill="#111" d="M0 0h2v2H0zM2 2h2v2H2z"/></svg>'
 
 // Una imagen de 1x1 para las fotos.
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
 
 // Se instala en el contexto del navegador: todas las pestañas comparten la misma base.
-export async function instalarSupabase(contexto) {
-  const db = datosIniciales()
+// Con `sinCodigo`, el admin todavía no activó Google Authenticator.
+export async function instalarSupabase(contexto, { sinCodigo = false } = {}) {
+  const db = { ...datosIniciales(), factores: sinCodigo ? [] : [{ ...FACTOR }] }
   const sockets = new Set()
 
   await contexto.route(`${URL_SUPABASE}/**`, async (route) => {
@@ -95,12 +103,34 @@ export async function instalarSupabase(contexto) {
 
     if (url.pathname === '/auth/v1/token') {
       const { email, password } = pedido.postDataJSON()
-      if (email !== USUARIO.email || password !== CONTRASENA) {
+      if (email !== 'admin@usuarios.interno' || password !== CONTRASENA) {
         return json({ code: 400, error_code: 'invalid_credentials', msg: 'Invalid login credentials' }, 400)
       }
-      return json({ access_token: token(), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r', user: USUARIO })
+      return json(sesion(db, 'aal1'))
     }
-    if (url.pathname === '/auth/v1/user') return json(USUARIO)
+    if (url.pathname === '/auth/v1/user') return json(usuario(db))
+
+    // Código de seguridad: alta, desafío, verificación y baja de factores.
+    if (url.pathname === '/auth/v1/factors' && pedido.method() === 'POST') {
+      const { friendly_name } = pedido.postDataJSON()
+      db.factores.push({ ...FACTOR, id: 'factor-nuevo', friendly_name, status: 'unverified' })
+      return json({ id: 'factor-nuevo', type: 'totp', friendly_name, totp: { qr_code: QR, secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/Stock' } })
+    }
+    const factor = url.pathname.match(/^\/auth\/v1\/factors\/([^/]+)(?:\/(challenge|verify))?$/)
+    if (factor) {
+      const [, id, accion] = factor
+      if (!accion && pedido.method() === 'DELETE') {
+        db.factores = db.factores.filter((f) => f.id !== id)
+        return json({ id })
+      }
+      if (accion === 'challenge') return json({ id: 'desafio-1', type: 'totp', expires_at: Math.floor(Date.now() / 1000) + 300 })
+      if (accion === 'verify') {
+        if (pedido.postDataJSON().code !== CODIGO) return json({ code: 422, error_code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' }, 422)
+        for (const f of db.factores) if (f.id === id) f.status = 'verified'
+        return json(sesion(db, 'aal2'))
+      }
+    }
+    if (url.pathname === '/rest/v1/rpc/usuarios_con_codigo') return json(db.factores.some((f) => f.status === 'verified') ? [ADMIN.id] : [])
     if (url.pathname === '/auth/v1/logout') return route.fulfill({ status: 204 })
 
     if (url.pathname === '/rest/v1/rpc/registrar_movimiento') {
@@ -172,4 +202,7 @@ export async function ingresarComoAdmin(page) {
   await page.getByLabel('Usuario').fill('admin')
   await page.getByLabel('Contraseña').fill(CONTRASENA)
   await page.getByRole('button', { name: 'Ingresar' }).click()
+  await page.getByLabel('Código').fill(CODIGO)
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await page.waitForURL((url) => url.pathname !== '/admin/codigo')
 }
