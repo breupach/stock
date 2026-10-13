@@ -78,8 +78,12 @@ export default function FichaProducto() {
     <>
       <Encabezado />
       <main className="mx-auto max-w-5xl px-4 pt-6 pb-28">
-        <button type="button" onClick={volver} className="mb-4 text-sm text-tinta underline">
-          ← Volver al catálogo
+        <button
+          type="button"
+          onClick={volver}
+          className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-linea bg-superficie py-1.5 pr-3 pl-2.5 text-[13px] font-semibold text-tinta hover:border-tinta"
+        >
+          <span aria-hidden="true">←</span> Catálogo
         </button>
         {estadoCarga === 'cargando' && <p className="text-suave">Cargando…</p>}
         {estadoCarga === 'error' && <p className="text-sin-stock">No se pudo cargar el producto. Probá recargar la página.</p>}

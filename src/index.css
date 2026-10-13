@@ -71,3 +71,15 @@
 body {
   @apply bg-papel text-texto antialiased;
 }
+
+/* Tailwind deja los botones con la flecha común; acá toda acción muestra la mano. */
+button:not(:disabled),
+[role='button'],
+select,
+label:has(> input[type='checkbox']) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
