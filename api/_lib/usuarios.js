@@ -15,6 +15,20 @@ export function nivelDelToken(token) {
     return 'aal1'
   }
 }
+// La clave de servicio es la "secret key" nueva de Supabase (sb_secret_...) o la
+// "service_role" vieja (un JWT). Cualquier otra cosa (por ejemplo la contraseña
+// de la base) hace que Supabase rechace todo y el panel diga "sesión vencida".
+export function claveDeServicioValida(clave) {
+  const limpia = (clave ?? '').trim()
+  if (limpia.startsWith('sb_secret_')) return true
+  try {
+    const carga = JSON.parse(Buffer.from(limpia.split('.')[1], 'base64url').toString('utf8'))
+    return carga.role === 'service_role'
+  } catch {
+    return false
+  }
+}
+
 const error = (status, codigo, mensaje) => respuesta(status, { error: codigo, mensaje })
 
 // Lógica de /api/users, separada del handler de Vercel para poder probarla.

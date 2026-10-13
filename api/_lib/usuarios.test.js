@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { manejarUsuarios } from './usuarios.js'
+import { claveDeServicioValida, manejarUsuarios } from './usuarios.js'
 
 const ADMIN_ID = 'admin-1'
 
@@ -124,5 +124,21 @@ describe('/api/users', () => {
   it('no deja que el admin restablezca su propio código', async () => {
     expect((await llamar('PATCH', { id: ADMIN_ID, restablecerCodigo: true })).body.error).toBe('propio_usuario')
     expect(admin.auth.admin.mfa.deleteFactor).not.toHaveBeenCalled()
+  })
+})
+
+describe('claveDeServicioValida', () => {
+  const jwt = (role) => `cabecera.${Buffer.from(JSON.stringify({ role })).toString('base64url')}.firma`
+
+  it('acepta la clave secreta nueva y la service_role vieja', () => {
+    expect(claveDeServicioValida('sb_secret_abc123')).toBe(true)
+    expect(claveDeServicioValida(jwt('service_role'))).toBe(true)
+  })
+
+  it('rechaza la contraseña de la base, la clave pública y la anon', () => {
+    expect(claveDeServicioValida('password123')).toBe(false)
+    expect(claveDeServicioValida('sb_publishable_abc123')).toBe(false)
+    expect(claveDeServicioValida(jwt('anon'))).toBe(false)
+    expect(claveDeServicioValida('')).toBe(false)
   })
 })
