@@ -3,6 +3,11 @@ import { manejarUsuarios } from './usuarios.js'
 
 const ADMIN_ID = 'admin-1'
 
+// Token con la forma de un JWT; solo importa el nivel de seguridad (aal).
+const token = (aal) => `cabecera.${Buffer.from(JSON.stringify({ sub: ADMIN_ID, aal })).toString('base64url')}.firma`
+const CON_CODIGO = token('aal2')
+const SIN_CODIGO = token('aal1')
+
 // Cliente de Supabase falso: guarda perfiles en memoria y registra las llamadas a Auth.
 function clienteFalso(perfiles) {
   const tabla = new Map(perfiles.map((p) => [p.id, { ...p }]))
@@ -26,7 +31,7 @@ function clienteFalso(perfiles) {
     from: () => consulta(),
     auth: {
       getUser: vi.fn(async (token) =>
-        token === 'token-valido' ? { data: { user: { id: ADMIN_ID } }, error: null } : { data: null, error: new Error('jwt') },
+        token === CON_CODIGO || token === SIN_CODIGO ? { data: { user: { id: ADMIN_ID } }, error: null } : { data: null, error: new Error('jwt') },
       ),
       admin: {
         createUser: vi.fn(async ({ email }) =>
@@ -36,6 +41,10 @@ function clienteFalso(perfiles) {
         ),
         updateUserById: vi.fn(async () => ({ error: null })),
         deleteUser: vi.fn(async () => ({ error: null })),
+        mfa: {
+          listFactors: vi.fn(async () => ({ data: { factors: [{ id: 'f1' }, { id: 'f2' }] }, error: null })),
+          deleteFactor: vi.fn(async () => ({ data: null, error: null })),
+        },
       },
     },
   }
@@ -49,7 +58,7 @@ beforeEach(() => {
   ])
 })
 
-const llamar = (metodo, cuerpo, token = 'token-valido') => manejarUsuarios({ metodo, token, cuerpo, admin })
+const llamar = (metodo, cuerpo, tk = CON_CODIGO) => manejarUsuarios({ metodo, token: tk, cuerpo, admin })
 
 describe('/api/users', () => {
   it('rechaza sin sesión o con sesión inválida', async () => {
@@ -60,6 +69,13 @@ describe('/api/users', () => {
   it('rechaza a quien no es admin', async () => {
     admin.tabla.get(ADMIN_ID).role = 'operador'
     expect((await llamar('POST', {})).status).toBe(403)
+  })
+
+  it('rechaza al admin que no ingresó el código de seguridad', async () => {
+    const r = await llamar('POST', { usuario: 'maria', nombre: 'María', contrasena: 'segura123', rol: 'operador' }, SIN_CODIGO)
+    expect(r.status).toBe(403)
+    expect(r.body.error).toBe('falta_codigo')
+    expect(admin.auth.admin.createUser).not.toHaveBeenCalled()
   })
 
   it('crea un usuario con email interno y perfil', async () => {
@@ -96,5 +112,17 @@ describe('/api/users', () => {
     expect((await llamar('PATCH', { id: ADMIN_ID, rol: 'operador' })).body.error).toBe('propio_usuario')
     expect((await llamar('PATCH', { id: ADMIN_ID, activo: false })).body.error).toBe('propio_usuario')
     expect((await llamar('PATCH', { id: ADMIN_ID, contrasena: 'otra-clave' })).status).toBe(200)
+  })
+
+  it('restablece el código de otro admin borrando sus factores', async () => {
+    expect((await llamar('PATCH', { id: 'op-1', restablecerCodigo: true })).status).toBe(200)
+    expect(admin.auth.admin.mfa.listFactors).toHaveBeenCalledWith({ userId: 'op-1' })
+    expect(admin.auth.admin.mfa.deleteFactor).toHaveBeenCalledWith({ id: 'f1', userId: 'op-1' })
+    expect(admin.auth.admin.mfa.deleteFactor).toHaveBeenCalledWith({ id: 'f2', userId: 'op-1' })
+  })
+
+  it('no deja que el admin restablezca su propio código', async () => {
+    expect((await llamar('PATCH', { id: ADMIN_ID, restablecerCodigo: true })).body.error).toBe('propio_usuario')
+    expect(admin.auth.admin.mfa.deleteFactor).not.toHaveBeenCalled()
   })
 })

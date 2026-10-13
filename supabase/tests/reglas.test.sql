@@ -29,9 +29,16 @@ insert into public.profiles (id, username, name, role, active) values
   ('00000000-0000-0000-0000-00000000000b', 'operador', 'Operador', 'operador', true),
   ('00000000-0000-0000-0000-00000000000c', 'baja', 'Dado de baja', 'admin', false);
 
--- Admin: alta de producto y stock inicial
+-- Admin sin el código de seguridad: solo ve su propio perfil
 set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.igual((select role::text from public.profiles where id = auth.uid()), 'admin', 'admin sin código ve su perfil');
+select pg_temp.igual((select count(*) from public.profiles), 1::bigint, 'admin sin código no ve a los demás');
+select pg_temp.espera_error($$insert into public.brands (name) values ('SinCodigo')$$, 'row-level security');
+select pg_temp.espera_error($$select public.registrar_movimiento(1, 'entrada', 1)$$, 'no_autorizado');
+
+-- Admin con el código: alta de producto y stock inicial
+set request.jwt.claim.aal = 'aal2';
 insert into public.brands (name) values ('Acme');
 insert into public.products (sku, name, brand_id, price, cost, min_stock)
   values ('BUJ-001', 'Buje de bronce', (select id from public.brands where name = 'Acme'), 1500, 900, 2);
@@ -83,6 +90,16 @@ delete from public.product_photos where storage_path = 'f5.webp';
 select pg_temp.igual((select count(*) from public.product_photos), 4::bigint, 'fotos tras borrar una');
 select pg_temp.espera_error($$insert into public.products (sku, name, price) values ('BUJ-001', 'Repetido', 1)$$, 'duplicate key');
 
+-- Quién activó el código: solo lo ve un admin con el código
+reset role;
+insert into auth.mfa_factors (user_id, factor_type, status) values
+  ('00000000-0000-0000-0000-00000000000a', 'totp', 'verified'),
+  ('00000000-0000-0000-0000-00000000000c', 'totp', 'unverified');
+set role authenticated;
+select pg_temp.igual((select array_agg(u) from public.usuarios_con_codigo() u), array['00000000-0000-0000-0000-00000000000a'::uuid], 'admins con código');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.igual((select count(*) from public.usuarios_con_codigo()), 0::bigint, 'el operador no ve quién tiene código');
+
 -- Usuario dado de baja: sin acceso
 set request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
 select pg_temp.espera_error($$select public.registrar_movimiento(1, 'entrada', 1)$$, 'no_autorizado');
@@ -90,7 +107,9 @@ select pg_temp.igual((select count(*) from public.products), 0::bigint, 'baja no
 
 -- Público: catálogo sin cantidades ni costo
 reset request.jwt.claim.sub;
+reset request.jwt.claim.aal;
 set role anon;
+select pg_temp.espera_error($$select * from public.usuarios_con_codigo()$$, 'permission denied');
 select pg_temp.igual((select count(*) from public.catalogo_publico), 2::bigint, 'productos en el catálogo');
 select pg_temp.igual((select status::text from public.catalogo_publico where sku = 'BUJ-001'), 'ultimas', 'estado en el catálogo');
 select pg_temp.espera_error($$select stock from public.catalogo_publico$$, 'does not exist');

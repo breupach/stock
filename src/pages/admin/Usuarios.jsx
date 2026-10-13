@@ -58,7 +58,7 @@ function FormularioAlta({ alCrear }) {
   )
 }
 
-function FilaUsuario({ u, esYo, alCambiar }) {
+function FilaUsuario({ u, esYo, tieneCodigo, alCambiar }) {
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState(null)
 
@@ -76,10 +76,18 @@ function FilaUsuario({ u, esYo, alCambiar }) {
   return (
     <li className="tarjeta">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-sm font-semibold">
-          {u.name} <span className="font-normal text-suave">@{u.username}</span>
-          {esYo && <span className="ml-1 text-[11px] font-normal text-suave">(vos)</span>}
-        </p>
+        <div>
+          <p className="text-sm font-semibold">
+            {u.name} <span className="font-normal text-suave">@{u.username}</span>
+            {esYo && <span className="ml-1 text-[11px] font-normal text-suave">(vos)</span>}
+          </p>
+          {u.role === 'admin' && (
+            <p className="mt-1 text-[11px] text-suave">
+              Código de seguridad:{' '}
+              <b className={`font-semibold ${tieneCodigo ? 'text-disponible' : 'text-ultimas'}`}>{tieneCodigo ? 'activo' : 'pendiente'}</b>
+            </p>
+          )}
+        </div>
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${u.active ? 'text-disponible' : 'text-sin-stock'}`}>
           <span aria-hidden="true" className="h-[7px] w-[7px] rounded-full bg-current" />
           {u.active ? 'Activo' : 'Desactivado'}
@@ -108,6 +116,15 @@ function FilaUsuario({ u, esYo, alCambiar }) {
           <input type="password" autoComplete="new-password" placeholder="Nueva contraseña" minLength={8} className="campo mt-0 w-44 py-1.5" value={contrasena} onChange={(e) => setContrasena(e.target.value)} required />
           <button type="submit" className="btn-secundario">Cambiar</button>
         </form>
+        {!esYo && tieneCodigo && (
+          <button
+            type="button"
+            className="btn-secundario"
+            onClick={() => aplicar({ restablecerCodigo: true }, 'Código restablecido. La próxima vez que entre, lo activa de nuevo.')}
+          >
+            Restablecer código
+          </button>
+        )}
       </div>
       {mensaje && <p className="mt-2 text-[13px] text-suave">{mensaje}</p>}
     </li>
@@ -117,19 +134,21 @@ function FilaUsuario({ u, esYo, alCambiar }) {
 export default function Usuarios() {
   const { perfil } = useAuth()
   const [usuarios, setUsuarios] = useState(null)
+  const [conCodigo, setConCodigo] = useState(new Set())
 
   const [version, setVersion] = useState(0)
   const cargar = useCallback(() => setVersion((v) => v + 1), [])
 
   useEffect(() => {
     let vigente = true
-    supabase
-      .from('profiles')
-      .select('id, username, name, role, active')
-      .order('name')
-      .then(({ data }) => {
-        if (vigente) setUsuarios(data ?? [])
-      })
+    Promise.all([
+      supabase.from('profiles').select('id, username, name, role, active').order('name'),
+      supabase.rpc('usuarios_con_codigo'),
+    ]).then(([perfiles, codigos]) => {
+      if (!vigente) return
+      setUsuarios(perfiles.data ?? [])
+      setConCodigo(new Set(codigos.data ?? []))
+    })
     return () => {
       vigente = false
     }
@@ -144,7 +163,7 @@ export default function Usuarios() {
       ) : (
         <ul className="space-y-3">
           {usuarios.map((u) => (
-            <FilaUsuario key={u.id} u={u} esYo={u.id === perfil.id} alCambiar={cargar} />
+            <FilaUsuario key={u.id} u={u} esYo={u.id === perfil.id} tieneCodigo={conCodigo.has(u.id)} alCambiar={cargar} />
           ))}
         </ul>
       )}

@@ -2,12 +2,10 @@ import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { ingresar } from '../../auth/acciones.js'
 import { useAuth } from '../../auth/contexto.js'
-import BotonTema from '../../components/BotonTema.jsx'
-import { useConfiguracion } from '../../hooks/useConfiguracion.js'
+import PantallaIngreso from '../../components/PantallaIngreso.jsx'
 
 export default function Login() {
   const { perfil } = useAuth()
-  const config = useConfiguracion()
   const navigate = useNavigate()
   const location = useLocation()
   const [usuario, setUsuario] = useState('')
@@ -29,14 +27,7 @@ export default function Login() {
   }
 
   return (
-    <main className="relative mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-3.5 px-4">
-      <div className="absolute top-3 right-3">
-        <BotonTema className="border border-linea bg-superficie text-tinta hover:border-tinta focus-visible:outline-tinta" />
-      </div>
-      <div>
-        {config?.nombre_negocio && <p className="text-[13px] text-suave">{config.nombre_negocio}</p>}
-        <h1 className="titulo">Ingresar al panel</h1>
-      </div>
+    <PantallaIngreso titulo="Ingresar al panel">
       <form onSubmit={enviar} className="tarjeta space-y-4">
         <label className="block">
           <span className="etiqueta">Usuario</span>
@@ -70,6 +61,6 @@ export default function Login() {
         </button>
       </form>
       <p className="text-center text-[11px] text-suave">¿Te olvidaste la contraseña? Pedile al administrador que te la cambie.</p>
-    </main>
+    </PantallaIngreso>
   )
 }
