@@ -8,11 +8,15 @@ import { formatearCantidad } from '../../lib/formato.js'
 import { unidadPara } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
 
-function Cifra({ titulo, valor, to, color = '' }) {
+// Cada cifra abre el listado de productos ya filtrado.
+function Cifra({ titulo, valor, to, color = 'text-tinta', punto = false }) {
   return (
-    <Link to={to} className="rounded-lg border border-stone-200 bg-white p-4 hover:border-stone-300">
-      <p className="text-sm text-stone-500">{titulo}</p>
-      <p className={`mt-1 text-3xl font-semibold ${color}`}>{valor}</p>
+    <Link to={to} className="tarjeta p-3 hover:border-tinta">
+      <p className="text-[13px] text-suave">{titulo}</p>
+      <p className={`mt-0.5 flex items-center gap-2 text-2xl font-semibold tabular-nums ${color}`}>
+        {valor}
+        {punto && <span aria-hidden="true" className="h-2 w-2 rounded-full bg-current" />}
+      </p>
     </Link>
   )
 }
@@ -54,39 +58,40 @@ export default function Tablero() {
   }, [])
 
   if (error) return <p className="text-sin-stock">{error}</p>
-  if (!datos) return <p className="text-stone-500">Cargando…</p>
+  if (!datos) return <p className="text-suave">Cargando…</p>
 
   const alertas = datos.productos.filter((p) => p.estado !== 'disponible')
   const sinStock = alertas.filter((p) => p.estado === 'sin_stock').length
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="max-w-5xl space-y-4 md:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Tablero</h1>
-        <Link to="/admin/movimientos/nuevo" className="rounded-md bg-marca px-4 py-2.5 font-medium text-white">
+        <h1 className="titulo">Tablero</h1>
+        <Link to="/admin/movimientos/nuevo" className="btn-accion">
           Registrar movimiento
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2.5 md:gap-3">
         <Cifra titulo="Productos activos" valor={datos.productos.length} to="/admin/productos" />
-        <Cifra titulo="Stock bajo" valor={alertas.length - sinStock} to="/admin/productos" color="text-ultimas" />
-        <Cifra titulo="Sin stock" valor={sinStock} to="/admin/productos" color="text-sin-stock" />
+        <Cifra titulo="Stock bajo" valor={alertas.length - sinStock} to="/admin/productos?filtro=bajo" color="text-ultimas" punto />
+        <Cifra titulo="Sin stock" valor={sinStock} to="/admin/productos?filtro=sin_stock" color="text-sin-stock" punto />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-lg border border-stone-200 bg-white p-4">
-          <h2 className="font-semibold">Para reponer</h2>
+      <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-2">
+        <section className="tarjeta">
+          <h2 className="subtitulo">Para reponer</h2>
           {alertas.length === 0 ? (
-            <p className="mt-2 text-sm text-stone-500">Todos los productos están por encima del mínimo.</p>
+            <p className="mt-2 text-[13px] text-suave">Todos los productos están por encima del mínimo.</p>
           ) : (
-            <ul className="mt-2 divide-y divide-stone-100">
+            <ul className="mt-1.5 divide-y divide-linea">
               {alertas.map((p) => (
-                <li key={p.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                  <Link to={`/admin/productos/${p.id}`} className="min-w-0 hover:underline">
-                    {p.name} <span className="text-sm text-stone-500">{p.sku}</span>
+                <li key={p.id} className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                  <Link to={`/admin/productos/${p.id}`} className="grid min-w-0 hover:underline">
+                    <span className="text-sm font-semibold">{p.name}</span>
+                    <span className="font-mono text-[11px] text-suave">{p.sku}</span>
                   </Link>
-                  <span className="flex shrink-0 flex-wrap items-center gap-2 text-sm">
+                  <span className="flex shrink-0 flex-wrap items-center gap-2 text-[13px] tabular-nums">
                     {formatearCantidad(p.stock)} / mín. {formatearCantidad(p.min_stock)} {unidadPara(p.unit, p.min_stock)}
                     <EstadoStock estado={p.estado} />
                   </span>
@@ -96,10 +101,10 @@ export default function Tablero() {
           )}
         </section>
 
-        <section className="rounded-lg border border-stone-200 bg-white p-4">
+        <section className="tarjeta">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-semibold">Últimos movimientos</h2>
-            <Link to="/admin/movimientos" className="text-sm text-marca underline">Ver todos</Link>
+            <h2 className="subtitulo">Últimos movimientos</h2>
+            <Link to="/admin/movimientos" className="enlace text-[13px]">Ver todos</Link>
           </div>
           <div className="mt-1">
             <ListaMovimientos movimientos={datos.movimientos} nombres={datos.nombres} vacio="Todavía no hay movimientos." />

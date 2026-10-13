@@ -1,4 +1,4 @@
-// Tema de las pantallas públicas. Sin elección guardada, sigue al celular o la computadora.
+// Tema de la app (catálogo y panel). Sin elección guardada, sigue al celular o la computadora.
 const CLAVE = 'stock.tema'
 
 export function leerTema(almacen = globalThis.localStorage) {

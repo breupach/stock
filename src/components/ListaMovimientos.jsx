@@ -25,23 +25,23 @@ function Fila({ m, nombres, mostrarProducto, alCambiar }) {
     <li className="py-2.5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <div className="min-w-0">
-          <span className="font-medium">{m.reverses_id ? 'Reversión' : ETIQUETA_TIPO[m.type]}</span>
+          <span className="text-[13px] font-semibold">{m.reverses_id ? 'Reversión' : ETIQUETA_TIPO[m.type]}</span>
           {mostrarProducto && m.products && (
             <>
               {' · '}
-              <Link to={`/admin/productos/${m.product_id}`} className="hover:underline">{m.products.name}</Link>
+              <Link to={`/admin/productos/${m.product_id}`} className="text-[13px] font-medium text-tinta hover:underline">{m.products.name}</Link>
             </>
           )}
-          {m.revertido && <span className="ml-2 rounded bg-stone-200 px-1.5 text-xs">Revertido</span>}
+          {m.revertido && <span className="ml-1.5 rounded bg-foto px-1.5 py-px text-[11px] font-medium text-suave">Revertido</span>}
         </div>
         <div className="text-right">
-          <span className={`font-semibold ${positivo ? 'text-disponible' : 'text-sin-stock'}`}>
-            {positivo ? '+' : ''}{formatearCantidad(m.quantity)} {unidad}
+          <span className={`text-sm font-semibold tabular-nums ${positivo ? 'text-disponible' : 'text-sin-stock'}`}>
+            {positivo ? '+' : '−'}{formatearCantidad(Math.abs(Number(m.quantity)))} {unidad}
           </span>
-          <span className="ml-2 text-sm text-stone-500">saldo {formatearCantidad(m.balance_after)}</span>
+          <span className="ml-2 font-mono text-[11px] text-suave">saldo {formatearCantidad(m.balance_after)}</span>
         </div>
       </div>
-      <div className="mt-0.5 flex flex-wrap items-center justify-between gap-2 text-sm text-stone-500">
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-suave">
         <span>
           {fecha.format(new Date(m.created_at))}
           {nombres[m.user_id] && ` · ${nombres[m.user_id]}`}
@@ -49,21 +49,21 @@ function Fila({ m, nombres, mostrarProducto, alCambiar }) {
           {m.reference && ` · Ref. ${m.reference}`}
         </span>
         {alCambiar && !m.reverses_id && !m.revertido && (
-          <button type="button" onClick={revertir} className="text-marca underline">
+          <button type="button" onClick={revertir} className="rounded-md border border-linea px-2 py-0.5 text-[11px] font-semibold text-tinta hover:border-tinta">
             Revertir
           </button>
         )}
       </div>
-      {error && <p role="alert" className="mt-1 text-sm text-sin-stock">{error}</p>}
+      {error && <p role="alert" className="mt-1 text-[13px] text-sin-stock">{error}</p>}
     </li>
   )
 }
 
 // alCambiar: si se pasa, cada movimiento muestra "Revertir" y lo llama al terminar.
 export default function ListaMovimientos({ movimientos, nombres = {}, mostrarProducto = true, alCambiar, vacio = 'No hay movimientos.' }) {
-  if (movimientos.length === 0) return <p className="text-sm text-stone-500">{vacio}</p>
+  if (movimientos.length === 0) return <p className="py-2 text-[13px] text-suave">{vacio}</p>
   return (
-    <ul className="divide-y divide-stone-100">
+    <ul className="divide-y divide-linea">
       {movimientos.map((m) => (
         <Fila key={m.id} m={m} nombres={nombres} mostrarProducto={mostrarProducto} alCambiar={alCambiar} />
       ))}

@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { ingresar } from '../../auth/acciones.js'
 import { useAuth } from '../../auth/contexto.js'
+import BotonTema from '../../components/BotonTema.jsx'
+import { useConfiguracion } from '../../hooks/useConfiguracion.js'
 
 export default function Login() {
   const { perfil } = useAuth()
+  const config = useConfiguracion()
   const navigate = useNavigate()
   const location = useLocation()
   const [usuario, setUsuario] = useState('')
@@ -26,13 +29,19 @@ export default function Login() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4">
-      <h1 className="mb-6 text-2xl font-semibold">Ingresar al panel</h1>
-      <form onSubmit={enviar} className="space-y-4">
+    <main className="relative mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-3.5 px-4">
+      <div className="absolute top-3 right-3">
+        <BotonTema className="border border-linea bg-superficie text-tinta hover:border-tinta focus-visible:outline-tinta" />
+      </div>
+      <div>
+        {config?.nombre_negocio && <p className="text-[13px] text-suave">{config.nombre_negocio}</p>}
+        <h1 className="titulo">Ingresar al panel</h1>
+      </div>
+      <form onSubmit={enviar} className="tarjeta space-y-4">
         <label className="block">
-          <span className="text-sm font-medium">Usuario</span>
+          <span className="etiqueta">Usuario</span>
           <input
-            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2.5"
+            className="campo"
             autoComplete="username"
             autoCapitalize="none"
             value={usuario}
@@ -41,10 +50,10 @@ export default function Login() {
           />
         </label>
         <label className="block">
-          <span className="text-sm font-medium">Contraseña</span>
+          <span className="etiqueta">Contraseña</span>
           <input
             type="password"
-            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2.5"
+            className="campo"
             autoComplete="current-password"
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
@@ -52,18 +61,15 @@ export default function Login() {
           />
         </label>
         {error && (
-          <p role="alert" className="text-sm text-sin-stock">
+          <p role="alert" className="text-[13px] text-sin-stock">
             {error}
           </p>
         )}
-        <button
-          type="submit"
-          disabled={enviando}
-          className="w-full rounded-md bg-marca px-4 py-3 font-medium text-white hover:bg-marca-oscuro disabled:opacity-60"
-        >
+        <button type="submit" disabled={enviando} className="btn-accion w-full py-3 text-sm">
           {enviando ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
+      <p className="text-center text-[11px] text-suave">¿Te olvidaste la contraseña? Pedile al administrador que te la cambie.</p>
     </main>
   )
 }

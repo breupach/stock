@@ -11,7 +11,11 @@ vi.mock('../../lib/supabase.js', () => ({
   supabase: {
     auth: { signInWithPassword: (...a) => signInWithPassword(...a), signOut: () => signOut() },
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { active: perfilActivo } }) }) }),
+      // El perfil (eq + maybeSingle) y la configuración del negocio (sin filtros).
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: { active: perfilActivo } }) }),
+        then: (resolver) => Promise.resolve({ data: [] }).then(resolver),
+      }),
     }),
   },
 }))

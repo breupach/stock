@@ -44,13 +44,36 @@ test('el catálogo se actualiza en vivo cuando se queda sin stock', async ({ pag
   await expect(eje).toContainText('Sin stock')
 })
 
-test('en el celular el menú del panel se abre y se cierra', async ({ page, isMobile }) => {
+test('en el celular se navega con la barra de abajo y el menú Más', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Solo en celular')
   await ingresarComoAdmin(page)
   await expect(page.getByRole('heading', { name: 'Tablero' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Productos', exact: true })).toBeHidden()
-  await page.getByRole('button', { name: 'Menú' }).click()
   await page.getByRole('link', { name: 'Productos', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Productos' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Movimientos', exact: true })).toBeHidden()
+  await page.getByRole('link', { name: 'Historial', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Más' }).click()
+  const menu = page.getByRole('dialog', { name: 'Más opciones' })
+  await expect(menu).toContainText('Brian')
+  await menu.getByRole('link', { name: 'Usuarios' }).click()
+  await expect(page.getByRole('heading', { name: 'Usuarios' })).toBeVisible()
+  await expect(menu).toBeHidden()
+})
+
+test('las cifras del tablero abren el listado filtrado', async ({ page }) => {
+  await ingresarComoAdmin(page)
+  await page.getByRole('link', { name: /Sin stock/ }).click()
+  await expect(page).toHaveURL(/filtro=sin_stock/)
+  await expect(page.getByRole('button', { name: 'Sin stock' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText('Caño de acero').filter({ visible: true })).toBeVisible()
+  await expect(page.getByText('Buje de bronce')).toHaveCount(0)
+})
+
+test('el modo oscuro también se aplica al panel', async ({ page }) => {
+  await ingresarComoAdmin(page)
+  await page.getByRole('button', { name: 'Cambiar a modo oscuro' }).first().click()
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  await page.goto('/')
+  await expect(page.locator('html')).toHaveClass(/dark/)
 })

@@ -3,13 +3,11 @@
 @theme {
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --color-marca: #1c3d7a;
-  --color-marca-oscuro: #15306a;
   --color-whatsapp: #25a35a;
 }
 
-/* Colores que cambian con el tema. El modo oscuro solo se activa en las pantallas
-   públicas (la clase .dark la pone TemaProvider); el panel usa siempre los claros. */
+/* Colores que cambian con el tema. La clase .dark la pone TemaProvider, en el
+   catálogo y en el panel por igual. */
 @theme inline {
   --color-papel: var(--papel);
   --color-superficie: var(--superficie);
@@ -20,6 +18,8 @@
   --color-activo: var(--activo);
   --color-accion: var(--accion);
   --color-accion-suave: var(--accion-suave);
+  --color-accion-texto: var(--accion-texto);
+  --color-encabezado-suave: var(--encabezado-suave);
   --color-foto: var(--foto);
   --color-encabezado: var(--encabezado);
   --color-barra: var(--barra);
@@ -39,6 +39,8 @@
   --activo: #1c3d7a;
   --accion: #c9480f;
   --accion-suave: #fdeee6;
+  --accion-texto: #ffffff;
+  --encabezado-suave: #c3cfe6;
   --foto: #e8edf4;
   --encabezado: #1c3d7a;
   --barra: #1c3d7a;
@@ -58,6 +60,8 @@
   --activo: #2d4c94;
   --accion: #f2814d;
   --accion-suave: #3a2316;
+  --accion-texto: #1d0e05;
+  --encabezado-suave: #93a3c4;
   --foto: #1d2944;
   --encabezado: #121c33;
   --barra: #24335a;
@@ -82,4 +86,45 @@ label:has(> input[type='checkbox']) {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+/* Piezas del panel, con el mismo estilo que el catálogo. */
+@layer components {
+  .btn-accion {
+    @apply inline-flex items-center justify-center rounded-lg bg-accion px-3.5 py-2.5 text-[13px] font-semibold whitespace-nowrap text-accion-texto hover:brightness-110 disabled:opacity-60;
+  }
+  .btn-secundario {
+    @apply inline-flex items-center justify-center rounded-lg border border-linea bg-superficie px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap text-tinta hover:border-tinta disabled:opacity-60;
+  }
+  .btn-volver {
+    @apply inline-flex items-center gap-1.5 self-start rounded-full border border-linea bg-superficie py-1.5 pr-3 pl-2.5 text-[13px] font-semibold text-tinta hover:border-tinta;
+  }
+  .tarjeta {
+    @apply rounded-lg border border-linea bg-superficie p-3.5;
+  }
+  /* 16 px en el celular: con menos, el iPhone agranda la pantalla al tocar el campo. */
+  .campo {
+    @apply mt-1 block w-full rounded-lg border border-linea bg-superficie px-3 py-2 text-base text-texto placeholder:text-suave disabled:bg-foto disabled:text-suave md:text-sm;
+  }
+  .etiqueta {
+    @apply text-[13px] font-semibold;
+  }
+  .ayuda {
+    @apply mt-1 block text-[11px] text-suave;
+  }
+  .enlace {
+    @apply font-semibold text-tinta hover:underline;
+  }
+  .ficha {
+    @apply rounded-full border border-linea bg-superficie px-3 py-1.5 text-[13px] text-texto;
+  }
+  .ficha[aria-pressed='true'] {
+    @apply border-activo bg-activo text-white;
+  }
+  .titulo {
+    @apply text-2xl font-semibold text-texto;
+  }
+  .subtitulo {
+    @apply text-sm font-semibold;
+  }
 }

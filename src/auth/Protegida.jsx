@@ -6,10 +6,10 @@ export default function Protegida({ soloAdmin = false, children }) {
   const { cargando, perfil } = useAuth()
   const location = useLocation()
 
-  if (cargando) return <p className="p-6 text-stone-500">Cargando…</p>
+  if (cargando) return <p className="p-6 text-suave">Cargando…</p>
   if (!perfil) return <Navigate to="/admin/login" replace state={{ desde: location.pathname }} />
   if (soloAdmin && perfil.role !== 'admin') {
-    return <p className="p-6 text-stone-600">Esta sección es solo para administradores.</p>
+    return <p className="p-6 text-suave">Esta sección es solo para administradores.</p>
   }
   return children
 }

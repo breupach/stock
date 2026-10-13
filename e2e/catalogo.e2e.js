@@ -93,12 +93,12 @@ test('el botón de tema alterna claro y oscuro y se recuerda', async ({ page }) 
   await expect(html).not.toHaveClass(/dark/)
 })
 
-test('sin elegir, el tema sigue al sistema y el panel queda en claro', async ({ page }) => {
+test('sin elegir, el tema sigue al sistema, también en el panel', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('/')
   await expect(page.locator('html')).toHaveClass(/dark/)
   await page.goto('/admin/login')
-  await expect(page.locator('html')).not.toHaveClass(/dark/)
+  await expect(page.locator('html')).toHaveClass(/dark/)
 })
 
 test('en la ficha se suma, se resta y se escribe la cantidad del carrito', async ({ page }) => {
