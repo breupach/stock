@@ -80,6 +80,34 @@ test('agregar desde la tarjeta y consultar desde la barra de abajo', async ({ pa
   await expect(page.getByRole('link', { name: /^Carrito:/ })).toHaveCount(0)
 })
 
+test('tocar la barra abre el carrito, que se edita y vuelve al catálogo filtrado', async ({ page }) => {
+  await page.goto('/?q=buje')
+  const buje = page.getByRole('listitem').filter({ hasText: 'Buje de bronce' })
+  await buje.getByRole('button', { name: /Agregar/ }).click()
+
+  // Cualquier lugar de la barra menos WhatsApp lleva al carrito; acá, el borde derecho del resumen.
+  const barra = page.getByRole('link', { name: /^Carrito:/ })
+  const caja = await page.getByRole('link', { name: 'Consultar por WhatsApp' }).boundingBox()
+  await page.mouse.click(caja.x - 6, caja.y + caja.height / 2)
+  await expect(page).toHaveURL(/\/carrito$/)
+  await expect(barra).toHaveCount(0)
+  await expect(page.getByText('1 producto · 1 unidad')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Sumar uno de Buje de bronce' }).click()
+  await page.getByRole('button', { name: 'Sumar uno de Buje de bronce' }).click()
+  await page.getByRole('button', { name: 'Quitar uno de Buje de bronce' }).click()
+  await expect(page.getByLabel('Cantidad de Buje de bronce')).toHaveValue('2')
+  await expect(page.getByText('Total estimado').locator('..')).toContainText('25.000')
+
+  await page.getByRole('button', { name: 'Catálogo' }).click()
+  await expect(page).toHaveURL(/\?q=buje$/)
+  await expect(buje.getByRole('status')).toHaveText('En el carrito 2')
+
+  await page.goto('/carrito')
+  await page.getByRole('button', { name: 'Quitar Buje de bronce del carrito' }).click()
+  await expect(page.getByText('Tu carrito está vacío')).toBeVisible()
+})
+
 test('el botón de tema alterna claro y oscuro y se recuerda', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' })
   await page.goto('/')
