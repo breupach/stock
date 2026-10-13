@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { guardarTema, leerTema, temaInicial } from '../lib/tema.js'
 import { TemaContext } from './contexto.js'
 
-// Envuelve solo las pantallas públicas: al salir hacia el panel se vuelve al tema claro.
+// Envuelve toda la app: catálogo y panel comparten el tema elegido.
 export default function TemaProvider({ children }) {
   const [oscuro, setOscuro] = useState(() => temaInicial())
 

@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import AuthProvider from './auth/AuthProvider.jsx'
 import CarritoProvider from './carrito/CarritoProvider.jsx'
 import Protegida from './auth/Protegida.jsx'
@@ -25,67 +25,61 @@ export default function App() {
   return (
     <AuthProvider>
       <CarritoProvider>
-        <Routes>
-          <Route
-            element={
-              <TemaProvider>
-                <Outlet />
-              </TemaProvider>
-            }
-          >
+        <TemaProvider>
+          <Routes>
             <Route path="/" element={<Catalogo />} />
             <Route path="/producto/:id" element={<FichaProducto />} />
             <Route path="/carrito" element={<Carrito />} />
-          </Route>
-          <Route path="/admin/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <Protegida>
-                <AdminLayout />
-              </Protegida>
-            }
-          >
-            <Route index element={<Tablero />} />
-            <Route path="productos" element={<Productos />} />
+            <Route path="/admin/login" element={<Login />} />
             <Route
-              path="productos/nuevo"
+              path="/admin"
               element={
-                <Protegida soloAdmin>
-                  <Producto />
+                <Protegida>
+                  <AdminLayout />
                 </Protegida>
               }
-            />
-            <Route path="productos/:id" element={<Producto />} />
-            <Route path="movimientos" element={<Movimientos />} />
-            <Route path="movimientos/nuevo" element={<RegistrarMovimiento />} />
-            <Route
-              path="marcas-categorias"
-              element={
-                <Protegida soloAdmin>
-                  <MarcasCategorias />
-                </Protegida>
-              }
-            />
-            <Route
-              path="usuarios"
-              element={
-                <Protegida soloAdmin>
-                  <Usuarios />
-                </Protegida>
-              }
-            />
-            <Route
-              path="configuracion"
-              element={
-                <Protegida soloAdmin>
-                  <Configuracion />
-                </Protegida>
-              }
-            />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            >
+              <Route index element={<Tablero />} />
+              <Route path="productos" element={<Productos />} />
+              <Route
+                path="productos/nuevo"
+                element={
+                  <Protegida soloAdmin>
+                    <Producto />
+                  </Protegida>
+                }
+              />
+              <Route path="productos/:id" element={<Producto />} />
+              <Route path="movimientos" element={<Movimientos />} />
+              <Route path="movimientos/nuevo" element={<RegistrarMovimiento />} />
+              <Route
+                path="marcas-categorias"
+                element={
+                  <Protegida soloAdmin>
+                    <MarcasCategorias />
+                  </Protegida>
+                }
+              />
+              <Route
+                path="usuarios"
+                element={
+                  <Protegida soloAdmin>
+                    <Usuarios />
+                  </Protegida>
+                }
+              />
+              <Route
+                path="configuracion"
+                element={
+                  <Protegida soloAdmin>
+                    <Configuracion />
+                  </Protegida>
+                }
+              />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </TemaProvider>
       </CarritoProvider>
     </AuthProvider>
   )

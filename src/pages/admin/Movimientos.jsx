@@ -6,7 +6,7 @@ import { ETIQUETA_TIPO } from '../../lib/movimientos.js'
 import { supabase } from '../../lib/supabase.js'
 
 const LIMITE = 200
-const campo = 'mt-1 block w-full rounded-md border border-stone-300 px-2 py-1.5 text-sm'
+const campo = 'campo py-1.5'
 const FILTROS_VACIOS = { producto: '', tipo: '', usuario: '', desde: '', hasta: '' }
 
 // Fecha local (aaaa-mm-dd) a instante ISO; `finDelDia` toma el día siguiente a las 0 h.
@@ -62,53 +62,53 @@ export default function Movimientos() {
   return (
     <div className="max-w-4xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Movimientos</h1>
-        <Link to="/admin/movimientos/nuevo" className="rounded-md bg-marca px-4 py-2.5 font-medium text-white">
+        <h1 className="titulo">Movimientos</h1>
+        <Link to="/admin/movimientos/nuevo" className="btn-accion">
           Registrar movimiento
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 rounded-lg border border-stone-200 bg-white p-3 sm:grid-cols-5">
+      <div className="tarjeta grid grid-cols-2 gap-3 p-3 sm:grid-cols-5">
         <label className="col-span-2 sm:col-span-1">
-          <span className="text-xs font-medium">Producto</span>
+          <span className="text-[11px] font-semibold tracking-wider text-suave uppercase">Producto</span>
           <select className={campo} value={filtros.producto} onChange={set('producto')}>
             <option value="">Todos</option>
             {opciones.productos.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </label>
         <label>
-          <span className="text-xs font-medium">Tipo</span>
+          <span className="text-[11px] font-semibold tracking-wider text-suave uppercase">Tipo</span>
           <select className={campo} value={filtros.tipo} onChange={set('tipo')}>
             <option value="">Todos</option>
             {Object.entries(ETIQUETA_TIPO).map(([v, e]) => <option key={v} value={v}>{e}</option>)}
           </select>
         </label>
         <label>
-          <span className="text-xs font-medium">Usuario</span>
+          <span className="text-[11px] font-semibold tracking-wider text-suave uppercase">Usuario</span>
           <select className={campo} value={filtros.usuario} onChange={set('usuario')}>
             <option value="">Todos</option>
             {opciones.usuarios.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
         </label>
         <label>
-          <span className="text-xs font-medium">Desde</span>
+          <span className="text-[11px] font-semibold tracking-wider text-suave uppercase">Desde</span>
           <input type="date" className={campo} value={filtros.desde} onChange={set('desde')} />
         </label>
         <label>
-          <span className="text-xs font-medium">Hasta</span>
+          <span className="text-[11px] font-semibold tracking-wider text-suave uppercase">Hasta</span>
           <input type="date" className={campo} value={filtros.hasta} onChange={set('hasta')} />
         </label>
         {hayFiltros && (
-          <button type="button" className="col-span-2 justify-self-start text-sm text-marca underline sm:col-span-5" onClick={() => setFiltros(FILTROS_VACIOS)}>
+          <button type="button" className="enlace col-span-2 justify-self-start text-[13px] sm:col-span-5" onClick={() => setFiltros(FILTROS_VACIOS)}>
             Limpiar filtros
           </button>
         )}
       </div>
 
       {error && <p className="text-sin-stock">{error}</p>}
-      {!error && movimientos === null && <p className="text-stone-500">Cargando…</p>}
+      {!error && movimientos === null && <p className="text-suave">Cargando…</p>}
       {movimientos && (
-        <section className="rounded-lg border border-stone-200 bg-white px-4 py-2">
+        <section className="tarjeta py-1">
           <ListaMovimientos
             movimientos={movimientos}
             nombres={nombres}
@@ -116,7 +116,7 @@ export default function Movimientos() {
             vacio={hayFiltros ? 'Ningún movimiento coincide con los filtros.' : 'Todavía no hay movimientos.'}
           />
           {movimientos.length === LIMITE && (
-            <p className="py-2 text-sm text-stone-500">Se muestran los últimos {LIMITE}. Usá los filtros para ver más atrás.</p>
+            <p className="py-2 text-[11px] text-suave">Se muestran los últimos {LIMITE}. Usá los filtros para ver más atrás.</p>
           )}
         </section>
       )}

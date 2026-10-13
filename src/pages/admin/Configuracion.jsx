@@ -3,7 +3,7 @@ import { olvidarConfiguracion } from '../../lib/configuracion.js'
 import { supabase } from '../../lib/supabase.js'
 import { linkWhatsApp } from '../../lib/whatsapp.js'
 
-const campo = 'mt-1 block w-full rounded-md border border-stone-300 px-3 py-2'
+const campo = 'campo'
 
 export default function Configuracion() {
   const [f, setF] = useState(null)
@@ -48,33 +48,33 @@ export default function Configuracion() {
     setAviso('Guardado.')
   }
 
-  if (!f) return error ? <p className="text-sin-stock">{error}</p> : <p className="text-stone-500">Cargando…</p>
+  if (!f) return error ? <p className="text-sin-stock">{error}</p> : <p className="text-suave">Cargando…</p>
   const prueba = linkWhatsApp(f.whatsapp_numero, 'Prueba desde el panel')
 
   return (
     <div className="max-w-xl space-y-4">
-      <h1 className="text-2xl font-semibold">Configuración</h1>
-      <form onSubmit={guardar} noValidate className="space-y-4 rounded-lg border border-stone-200 bg-white p-4">
+      <h1 className="titulo">Configuración</h1>
+      <form onSubmit={guardar} noValidate className="tarjeta space-y-4">
         <label className="block">
-          <span className="text-sm font-medium">Nombre del negocio</span>
+          <span className="etiqueta">Nombre del negocio</span>
           <input className={campo} value={f.nombre_negocio} onChange={(e) => setF({ ...f, nombre_negocio: e.target.value })} />
-          <span className="mt-1 block text-sm text-stone-500">Aparece arriba en el catálogo y en el saludo del mensaje.</span>
+          <span className="ayuda">Aparece arriba en el catálogo y en el saludo del mensaje.</span>
         </label>
         <label className="block">
-          <span className="text-sm font-medium">Número de WhatsApp</span>
+          <span className="etiqueta">Número de WhatsApp</span>
           <input className={campo} inputMode="tel" placeholder="54 9 11 1234 5678" value={f.whatsapp_numero} onChange={(e) => setF({ ...f, whatsapp_numero: e.target.value })} />
-          <span className="mt-1 block text-sm text-stone-500">
+          <span className="ayuda">
             Con código de país (54), el 9 de celular y el código de área, sin 0 ni 15. Si queda vacío, el carrito no muestra el botón de WhatsApp.
           </span>
         </label>
-        {error && <p role="alert" className="text-sm text-sin-stock">{error}</p>}
-        {aviso && <p role="status" className="text-sm text-disponible">{aviso}</p>}
+        {error && <p role="alert" className="text-[13px] text-sin-stock">{error}</p>}
+        {aviso && <p role="status" className="text-[13px] text-disponible">{aviso}</p>}
         <div className="flex flex-wrap items-center gap-4">
-          <button type="submit" disabled={guardando} className="rounded-md bg-marca px-4 py-2.5 font-medium text-white disabled:opacity-60">
+          <button type="submit" disabled={guardando} className="btn-accion">
             {guardando ? 'Guardando…' : 'Guardar'}
           </button>
           {prueba && (
-            <a href={prueba} target="_blank" rel="noopener noreferrer" className="text-sm text-marca underline">
+            <a href={prueba} target="_blank" rel="noopener noreferrer" className="enlace text-[13px]">
               Probar el número
             </a>
           )}

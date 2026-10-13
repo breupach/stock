@@ -19,15 +19,15 @@ import {
 } from '../../lib/productos.js'
 import { supabase } from '../../lib/supabase.js'
 
-const campo = 'mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 disabled:bg-stone-100'
+const campo = 'campo'
 const fecha = new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' })
 
 function Campo({ etiqueta, error, className = '', children }) {
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-medium">{etiqueta}</span>
+      <span className="etiqueta">{etiqueta}</span>
       {children}
-      {error && <span className="mt-1 block text-sm text-sin-stock">{error}</span>}
+      {error && <span className="mt-1 block text-[13px] text-sin-stock">{error}</span>}
     </label>
   )
 }
@@ -75,10 +75,10 @@ function Formulario({ inicial, producto, marcas, categorias, editable, alGuardar
   }
 
   return (
-    <form onSubmit={guardar} noValidate className="rounded-lg border border-stone-200 bg-white p-4">
+    <form onSubmit={guardar} noValidate className="tarjeta">
       <fieldset disabled={!editable || guardando} className="grid gap-4 sm:grid-cols-2">
         <Campo etiqueta="Código (SKU)" error={errores.sku}>
-          <input className={campo} value={f.sku} onChange={set('sku')} autoCapitalize="characters" />
+          <input className={`${campo} font-mono`} value={f.sku} onChange={set('sku')} autoCapitalize="characters" />
         </Campo>
         <Campo etiqueta="Nombre" error={errores.name}>
           <input className={campo} value={f.name} onChange={set('name')} />
@@ -90,10 +90,10 @@ function Formulario({ inicial, producto, marcas, categorias, editable, alGuardar
           </select>
         </Campo>
         <Campo etiqueta="Modelo">
-          <input className={campo} value={f.model} onChange={set('model')} />
+          <input className={`${campo} font-mono`} value={f.model} onChange={set('model')} />
         </Campo>
         <Campo etiqueta="Año" error={errores.year}>
-          <input className={campo} inputMode="numeric" value={f.year} onChange={set('year')} />
+          <input className={`${campo} font-mono`} inputMode="numeric" value={f.year} onChange={set('year')} />
         </Campo>
         <Campo etiqueta="Categoría">
           <select className={campo} value={f.category_id} onChange={set('category_id')}>
@@ -123,21 +123,21 @@ function Formulario({ inicial, producto, marcas, categorias, editable, alGuardar
             <input className={campo} inputMode="decimal" value={f.stock_inicial} onChange={set('stock_inicial')} placeholder="0" />
           </Campo>
         )}
-        <div className="flex flex-col gap-2 sm:col-span-2">
+        <div className="flex flex-col gap-2 text-[13px] sm:col-span-2">
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={f.active} onChange={set('active')} />
-            Activo <span className="text-sm text-stone-500">(un producto inactivo no admite movimientos ni se publica)</span>
+            <input type="checkbox" className="accent-activo" checked={f.active} onChange={set('active')} />
+            <span>Activo <span className="text-suave">(un producto inactivo no admite movimientos ni se publica)</span></span>
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={f.visible} onChange={set('visible')} />
+            <input type="checkbox" className="accent-activo" checked={f.visible} onChange={set('visible')} />
             Visible en el catálogo
           </label>
         </div>
       </fieldset>
-      {error && <p role="alert" className="mt-3 text-sm text-sin-stock">{error}</p>}
-      {aviso && <p className="mt-3 text-sm text-disponible">{aviso}</p>}
+      {error && <p role="alert" className="mt-3 text-[13px] text-sin-stock">{error}</p>}
+      {aviso && <p className="mt-3 text-[13px] text-disponible">{aviso}</p>}
       {editable && (
-        <button type="submit" disabled={guardando} className="mt-4 rounded-md bg-marca px-4 py-2.5 font-medium text-white disabled:opacity-60">
+        <button type="submit" disabled={guardando} className="btn-accion mt-4">
           {guardando ? 'Guardando…' : nuevo ? 'Crear producto' : 'Guardar cambios'}
         </button>
       )}
@@ -177,16 +177,24 @@ function Fotos({ productoId, fotos, editable, alCambiar }) {
   }
 
   return (
-    <section className="rounded-lg border border-stone-200 bg-white p-4">
-      <h2 className="font-semibold">Fotos <span className="text-sm font-normal text-stone-500">({fotos.length} de {MAX_FOTOS})</span></h2>
-      {fotos.length === 0 && <p className="mt-2 text-sm text-stone-500">Sin fotos.</p>}
+    <section className="tarjeta">
+      <h2 className="subtitulo">Fotos <span className="text-[13px] font-normal text-suave">({fotos.length} de {MAX_FOTOS})</span></h2>
+      {fotos.length === 0 && <p className="mt-2 text-[13px] text-suave">Sin fotos.</p>}
       <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         {fotos.map((foto, i) => (
           <li key={foto.id} className="relative">
-            <img src={urlFoto(foto.storage_path)} alt={`Foto ${i + 1}`} className="aspect-square w-full rounded-md border border-stone-200 object-cover" />
-            {i === 0 && <span className="absolute left-1 top-1 rounded bg-black/60 px-1.5 text-xs text-white">Principal</span>}
+            <img
+              src={urlFoto(foto.storage_path)}
+              alt={`Foto ${i + 1}`}
+              className={`aspect-square w-full rounded-md border-2 bg-foto object-cover ${i === 0 ? 'border-tinta' : 'border-transparent'}`}
+            />
+            {i === 0 && (
+              <span className="absolute top-1.5 left-1.5 rounded-full border border-linea bg-superficie px-1.5 py-px text-[11px] font-semibold text-tinta">
+                Principal
+              </span>
+            )}
             {editable && (
-              <button type="button" onClick={() => quitar(foto)} className="mt-1 text-sm text-sin-stock underline">
+              <button type="button" onClick={() => quitar(foto)} className="mt-1 text-[13px] font-semibold text-sin-stock hover:underline">
                 Borrar
               </button>
             )}
@@ -194,30 +202,30 @@ function Fotos({ productoId, fotos, editable, alCambiar }) {
         ))}
       </ul>
       {editable && fotos.length < MAX_FOTOS && (
-        <label className="mt-3 inline-block cursor-pointer rounded-md border border-stone-300 px-3 py-2 text-sm">
+        <label className="btn-secundario mt-3 cursor-pointer">
           {subiendo ? 'Subiendo…' : 'Agregar fotos'}
           <input type="file" accept="image/*" multiple className="sr-only" disabled={subiendo} onChange={agregar} />
         </label>
       )}
-      {error && <p role="alert" className="mt-2 text-sm text-sin-stock">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-[13px] text-sin-stock">{error}</p>}
     </section>
   )
 }
 
 function HistorialPrecios({ cambios, nombres }) {
   return (
-    <section className="rounded-lg border border-stone-200 bg-white p-4">
-      <h2 className="font-semibold">Historial de precios</h2>
+    <section className="tarjeta">
+      <h2 className="subtitulo">Historial de precios</h2>
       {cambios.length === 0 ? (
-        <p className="mt-2 text-sm text-stone-500">El precio no cambió desde que se cargó el producto.</p>
+        <p className="mt-2 text-[13px] text-suave">El precio no cambió desde que se cargó el producto.</p>
       ) : (
-        <ul className="mt-2 divide-y divide-stone-100 text-sm">
+        <ul className="mt-1.5 divide-y divide-linea text-[13px]">
           {cambios.map((c) => (
             <li key={c.id} className="flex flex-wrap justify-between gap-2 py-2">
-              <span>
-                {formatearPrecio(c.old_price)} → <strong>{formatearPrecio(c.new_price)}</strong>
+              <span className="tabular-nums">
+                {formatearPrecio(c.old_price)} → <strong className="text-tinta">{formatearPrecio(c.new_price)}</strong>
               </span>
-              <span className="text-stone-500">
+              <span className="text-[11px] text-suave">
                 {fecha.format(new Date(c.created_at))}
                 {nombres[c.user_id] && ` · ${nombres[c.user_id]}`}
               </span>
@@ -287,24 +295,26 @@ export default function Producto() {
 
   const p = datos?.producto
   return (
-    <div className="max-w-4xl space-y-6">
-      <Link to="/admin/productos" className="text-sm text-marca underline">← Productos</Link>
-      <h1 className="text-2xl font-semibold">{nuevo ? 'Nuevo producto' : (p?.name ?? 'Producto')}</h1>
+    <div className="flex max-w-4xl flex-col gap-4">
+      <Link to="/admin/productos" className="btn-volver"><span aria-hidden="true">←</span> Productos</Link>
+      <h1 className="titulo">{nuevo ? 'Nuevo producto' : (p?.name ?? 'Producto')}</h1>
       {error && <p className="text-sin-stock">{error}</p>}
-      {!error && !datos && <p className="text-stone-500">Cargando…</p>}
-      {state?.aviso && <p role="alert" className="text-sm text-ultimas">{state.aviso}</p>}
+      {!error && !datos && <p className="text-suave">Cargando…</p>}
+      {state?.aviso && <p role="alert" className="text-[13px] text-ultimas">{state.aviso}</p>}
 
       {p && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-stone-200 bg-white p-4">
-          <span className="text-sm text-stone-500">Stock actual</span>
-          <span className="text-xl font-semibold">{formatearCantidad(p.stock)} {unidadPara(p.unit, p.stock)}</span>
+        <div className="tarjeta flex flex-wrap items-center gap-x-3.5 gap-y-2.5">
+          <span className="text-[13px] text-suave">Stock actual</span>
+          <span className="text-2xl font-semibold text-tinta tabular-nums">
+            {formatearCantidad(p.stock)} <span className="text-sm font-medium text-suave">{unidadPara(p.unit, p.stock)}</span>
+          </span>
           <EstadoStock estado={calcularEstado(p.stock, p.min_stock)} />
           {p.active ? (
-            <Link to={`/admin/movimientos/nuevo?producto=${p.id}`} className="ml-auto rounded-md bg-marca px-3 py-2 text-sm font-medium text-white">
+            <Link to={`/admin/movimientos/nuevo?producto=${p.id}`} className="btn-accion ml-auto py-2">
               Registrar movimiento
             </Link>
           ) : (
-            <span className="text-sm text-stone-500">Producto inactivo: no admite movimientos.</span>
+            <span className="text-[13px] text-suave">Producto inactivo: no admite movimientos.</span>
           )}
         </div>
       )}
@@ -322,10 +332,10 @@ export default function Producto() {
       )}
       {p && <Fotos productoId={p.id} fotos={datos.fotos} editable={esAdmin} alCambiar={recargar} />}
       {p && (
-        <section className="rounded-lg border border-stone-200 bg-white p-4">
+        <section className="tarjeta">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-semibold">Últimos movimientos</h2>
-            <Link to="/admin/movimientos" className="text-sm text-marca underline">Ver historial</Link>
+            <h2 className="subtitulo">Últimos movimientos</h2>
+            <Link to="/admin/movimientos" className="enlace text-[13px]">Ver historial</Link>
           </div>
           <div className="mt-1">
             <ListaMovimientos
