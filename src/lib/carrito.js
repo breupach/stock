@@ -1,3 +1,5 @@
+import { formatearCantidad } from './formato.js'
+
 // El carrito vive solo en el navegador: [{ productId, cantidad }].
 const CLAVE = 'stock.carrito'
 
@@ -49,4 +51,16 @@ export function totalEstimado(items, productos) {
     const p = productos[i.productId]
     return p ? suma + Number(p.price) * i.cantidad : suma
   }, 0)
+}
+
+// "2 productos · 3 unidades": las unidades solo se suman si todo se vende por unidad.
+export function resumenCarrito(items, productos) {
+  const porUnidad = items.length > 0 && items.every((i) => productos[i.productId]?.unit === 'unidad')
+  const unidades = items.reduce((s, i) => s + i.cantidad, 0)
+  return [
+    `${items.length} ${items.length === 1 ? 'producto' : 'productos'}`,
+    porUnidad && `${formatearCantidad(unidades)} ${unidades === 1 ? 'unidad' : 'unidades'}`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }

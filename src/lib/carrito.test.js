@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { agregarItem, cambiarCantidad, cantidadValida, guardarCarrito, leerCarrito, quitarItem, totalEstimado } from './carrito.js'
+import { agregarItem, cambiarCantidad, cantidadValida, guardarCarrito, leerCarrito, quitarItem, resumenCarrito, totalEstimado } from './carrito.js'
 
 function almacenFalso(inicial = {}) {
   const datos = { ...inicial }
@@ -41,5 +41,17 @@ describe('carrito', () => {
   it('suma el total solo de productos publicados', () => {
     const productos = { 1: { price: '1500' }, 2: { price: 800 } }
     expect(totalEstimado([{ productId: 1, cantidad: 2 }, { productId: 2, cantidad: 1.5 }, { productId: 9, cantidad: 1 }], productos)).toBe(4200)
+  })
+})
+
+describe('resumenCarrito', () => {
+  const productos = { 1: { unit: 'unidad' }, 2: { unit: 'unidad' }, 3: { unit: 'metro' } }
+  it('cuenta productos y unidades', () => {
+    expect(resumenCarrito([{ productId: 1, cantidad: 2 }, { productId: 2, cantidad: 1 }], productos)).toBe('2 productos · 3 unidades')
+    expect(resumenCarrito([{ productId: 1, cantidad: 1 }], productos)).toBe('1 producto · 1 unidad')
+  })
+  it('no suma unidades si hay algo por metro o sin cargar', () => {
+    expect(resumenCarrito([{ productId: 1, cantidad: 2 }, { productId: 3, cantidad: 1.5 }], productos)).toBe('2 productos')
+    expect(resumenCarrito([{ productId: 9, cantidad: 1 }], productos)).toBe('1 producto')
   })
 })
